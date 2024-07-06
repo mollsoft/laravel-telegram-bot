@@ -43,8 +43,13 @@ class TelegramServiceProvider extends PackageServiceProvider
                 $command
                     ->publishConfigFile()
                     ->publishMigrations()
-                    ->askToRunMigrations();
+                    ->askToRunMigrations()
+                    ->publish('routes');
             });
+
+        $this->publishes([
+            $this->package->basePath("stubs/routes/telegram.php.stub") => base_path('routes/telegram.php'),
+        ], "{$this->package->shortName()}-routes");
 
         $this->loadViewsFrom(resource_path('views/telegram'), 'telegram');
 
