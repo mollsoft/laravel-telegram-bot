@@ -19,12 +19,16 @@ You can install the package via composer:
 composer require mollsoft/laravel-telegram-bot
 ```
 
+```bash
+php artisan telegram:install
+```
+
 You can publish and run the migrations with:
 
 Вы можете опубликовать и запустить миграции:
 
 ```bash
-php artisan vendor:publish --tag="laravel-telegram-bot-migrations"
+php artisan vendor:publish --tag="telegram-migrations"
 php artisan migrate
 ```
 
@@ -33,33 +37,7 @@ You can publish the config file with:
 Вы можете опубликовать конфигурационные файлы командой:
 
 ```bash
-php artisan vendor:publish --tag="laravel-telegram-bot-config"
-```
-
-This is the contents of the published config file:
-
-Это содержимое конфигурационного файла:
-
-```php
-use \Telegram\DTO\BotCommand;
-
-return [
-    'init' => [
-        'default' => [
-            'commands' => [
-                BotCommand::create('start', 'Главное меню'),
-                BotCommand::create('refresh', 'Обновить'),
-                BotCommand::create('back', 'Назад'),
-            ]
-        ]
-    ],
-    'page' => [
-        'timeout' => 60, // таймаут в секундах на обработку запроса
-        'wait' => 5, // время ожидания завершения предыдущего запроса
-        'delay' => 2, // задержка после обработки запроса
-        'max_redirects' => 3, // максимальное количество редиректов
-    ]
-];
+php artisan vendor:publish --tag="telegram-config"
 ```
 
 Optionally, you can publish the views using:
@@ -67,15 +45,38 @@ Optionally, you can publish the views using:
 Опционально, Вы можете опубликовать шаблоны командой:
 
 ```bash
-php artisan vendor:publish --tag=":package_slug-views"
+php artisan vendor:publish --tag="telegram-views"
 ```
 
 ## Usage / Использование
 
+Create new Telegram Bot:
+
 ```php
-$variable = new VendorName\Skeleton();
-echo $variable->echoPhrase('Hello, VendorName!');
+php artisan telegram:new-bot
 ```
+
+
+Set Webhook for bot:
+
+```php
+php artisan telegram:set-webhook
+```
+
+
+Unset Webhook for bot:
+
+```php
+php artisan telegram:unset-webhook
+```
+
+
+Manual pooling (on localhost) for bot:
+
+```php
+php artisan telegram:pooling [BOT_ID]
+```
+
 
 ## Testing / Тестирование
 
