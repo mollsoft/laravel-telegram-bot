@@ -31,6 +31,13 @@ class CallbackQuery extends DTO
         return $this->get('data');
     }
 
+    public function getAllData(): array
+    {
+        parse_str($this->data(), $queryParams);
+
+        return $queryParams;
+    }
+
     public function getData(string $key, mixed $default = null): mixed
     {
         parse_str($this->data(), $queryParams);

@@ -52,7 +52,7 @@ class Form
 
     public function parseInput(string $attribute, TelegramRequest $request): ?string
     {
-        return $request->text() ?? $request->callbackQuery()?->getData('value');
+        return $request->text() ?? $request->post('value');
     }
 
     public function validate(array $rules = []): bool

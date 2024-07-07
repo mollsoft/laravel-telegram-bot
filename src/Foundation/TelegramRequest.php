@@ -10,6 +10,7 @@ use Mollsoft\Telegram\MessageStack;
 use Mollsoft\Telegram\Models\TelegramBot;
 use Mollsoft\Telegram\Models\TelegramChat;
 use Mollsoft\Telegram\Storage;
+use Symfony\Component\HttpFoundation\InputBag;
 
 class TelegramRequest extends \Illuminate\Http\Request
 {
@@ -96,6 +97,9 @@ class TelegramRequest extends \Illuminate\Http\Request
     public function setCallbackQuery(?CallbackQuery $callbackQuery): static
     {
         $this->callbackQuery = $callbackQuery;
+        if( $callbackQuery ) {
+            $this->request = new InputBag($callbackQuery->getAllData());
+        }
 
         return $this;
     }

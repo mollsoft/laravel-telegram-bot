@@ -145,7 +145,7 @@ class WebhookHandler
         $this->api->try('sendChatAction', ChatAction::Typing);
 
         $uri = $this->storage->get('uri') ?: '/';
-        if ($this->message?->text() === '/start') {
+        if ($this->message?->text() === '/start' || $this->callbackQuery?->hasData('start')) {
             $uri = '/';
         }
         $content = $this->routeLaunch($uri, $this->message?->text(), $this->callbackQuery);
