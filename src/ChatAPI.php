@@ -183,7 +183,7 @@ class ChatAPI extends ApiClient
                 $responseData = $this->sendRequest('sendDocument', [
                     ...$data,
                     'document' => $src,
-                ]);editMessageMedia
+                ]);
             }
 
             if ($hash && ($document = $responseData['document'] ?? null)) {
