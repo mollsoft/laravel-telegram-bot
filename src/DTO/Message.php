@@ -5,6 +5,7 @@ namespace Mollsoft\Telegram\DTO;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Date;
 use Mollsoft\Telegram\Abstract\DTO;
+use Mollsoft\Telegram\DTO\Message\Document;
 use Mollsoft\Telegram\DTO\Message\Photo;
 use Mollsoft\Telegram\DTO\Message\Video;
 use Mollsoft\Telegram\Enums\Direction;
@@ -15,6 +16,7 @@ class Message extends DTO
         'message' => Message::class,
         'photo' => Photo::class,
         'video' => Video::class,
+        'document' => Document::class,
     ];
 
     protected function required(): array
@@ -129,6 +131,9 @@ class Message extends DTO
         }
         if( isset( $attributes['video'] ) || isset($attributes['video_src']) ) {
             $attributes['type'] = 'video';
+        }
+        if( isset( $attributes['document'] ) || isset($attributes['document_src']) ) {
+            $attributes['type'] = 'document';
         }
 
         return new self::$types[$attributes['type']]($attributes, true);

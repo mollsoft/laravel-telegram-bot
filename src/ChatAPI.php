@@ -10,6 +10,7 @@ use Mollsoft\Telegram\Abstract\ApiClient;
 use Mollsoft\Telegram\Builder\EditMessageText;
 use Mollsoft\Telegram\Builder\SendMessage;
 use Mollsoft\Telegram\DTO\Message;
+use Mollsoft\Telegram\DTO\Message\Document;
 use Mollsoft\Telegram\DTO\Message\Photo;
 use Mollsoft\Telegram\DTO\Message\Video;
 use Mollsoft\Telegram\Enums\ChatAction;
@@ -120,6 +121,76 @@ class ChatAPI extends ApiClient
             }
 
             $responseData['video_src'] = $message->videoSrc();
+        } elseif ($message instanceof Video) {
+            if ($caption = $message->caption()) {
+                $data['caption'] = $caption;
+            }
+
+            $src = $message->videoSrc();
+            $hash = null;
+            if (File::exists($src)) {
+                $hash = hash_file('sha256', $src);
+                $cacheSrc = Cache::get('telegram_'.$hash);
+                $src = $cacheSrc ?: fopen($src, 'r');
+            }
+
+            try {
+                $responseData = $this->sendRequest('sendVideo', [
+                    ...$data,
+                    'video' => $src,
+                ]);
+            } catch (\Exception) {
+                $src = $message->videoSrc();
+                if (File::exists($src)) {
+                    $src = fopen($src, 'r');
+                }
+
+                $responseData = $this->sendRequest('sendVideo', [
+                    ...$data,
+                    'video' => $src,
+                ]);
+            }
+
+            if ($hash && ($video = $responseData['video'] ?? null)) {
+                Cache::set('telegram_'.$hash, $video['file_id'], 86400);
+            }
+
+            $responseData['video_src'] = $message->videoSrc();
+        } elseif ($message instanceof Document) {
+            if ($caption = $message->caption()) {
+                $data['caption'] = $caption;
+            }
+
+            $src = $message->documentSrc();
+            $hash = null;
+            if (File::exists($src)) {
+                $hash = hash_file('sha256', $src);
+                $cacheSrc = Cache::get('telegram_'.$hash);
+                $src = $cacheSrc ?: fopen($src, 'r');
+            }
+
+            try {
+                $responseData = $this->sendRequest('sendDocument', [
+                    ...$data,
+                    'document' => $src,
+                ]);
+            } catch (\Exception) {
+                $src = $message->documentSrc();
+                if (File::exists($src)) {
+                    $src = fopen($src, 'r');
+                }
+
+                $responseData = $this->sendRequest('sendDocument', [
+                    ...$data,
+                    'document' => $src,
+                ]);
+            }
+
+            if ($hash && ($document = $responseData['document'] ?? null)) {
+                Cache::set('telegram_'.$hash, $document['file_id'], 86400);
+            }
+
+            $responseData['document_src'] = $message->documentSrc();
         } else {
             if ($message->text()) {
                 $data['text'] = $message->text();

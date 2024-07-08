@@ -6,6 +6,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Mollsoft\Telegram\DTO\InlineKeyboard;
 use Mollsoft\Telegram\DTO\Message;
+use Mollsoft\Telegram\DTO\Message\Document;
 use Mollsoft\Telegram\DTO\Message\Photo;
 use Mollsoft\Telegram\DTO\Message\Video;
 use Mollsoft\Telegram\DTO\ReplyKeyboard;
@@ -40,11 +41,12 @@ readonly class HTMLParser
     protected function parseMessages(): static
     {
         $this->crawler
-            ->filter('message, photo, video')
+            ->filter('message, photo, video, document')
             ->each(fn(Crawler $item) => match ($item->nodeName()) {
                 'message' => $this->createMessage($item),
                 'photo' => $this->createPhoto($item),
                 'video' => $this->createVideo($item),
+                'document' => $this->createDocument($item),
             });
 
         return $this;
@@ -197,6 +199,57 @@ readonly class HTMLParser
         }
 
         return $video;
+    }
+
+    protected function createDocument(Crawler $crawler): Document
+    {
+        $document = Document::make();
+
+        if ($src = $crawler->attr('src')) {
+            $document->setDocumentSrc($src);
+        }
+
+        $lines = [];
+
+        $crawler
+            ->children()
+            ->each(function (Crawler $crawler) use (&$lines, $document) {
+                switch ($crawler->nodeName()) {
+                    case 'line':
+                        $lines[] = trim(
+                            str_replace("\n", '', $crawler->html())
+                        );
+                        break;
+
+                    case 'reply-keyboard':
+                        $document->setReplyKeyboard(
+                            $this->replyKeyboard($crawler)
+                        );
+                        break;
+
+                    case 'inline-keyboard':
+                        $document->setInlineKeyboard(
+                            $this->inlineKeyboard($crawler)
+                        );
+                        break;
+                }
+            });
+
+        if (count($lines) > 0) {
+            $linesString = implode("\n", $lines);
+            if ($linesString) {
+                $document->setCaption($linesString);
+            }
+        }
+
+        $isScreen = $crawler->closest('screen');
+        if ($isScreen) {
+            $this->screenMessages->push($document);
+        } else {
+            $this->appendMessages->push($document);
+        }
+
+        return $document;
     }
 
     protected function replyKeyboard(Crawler $crawler): ?ReplyKeyboard
