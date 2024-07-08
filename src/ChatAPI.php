@@ -183,7 +183,7 @@ class ChatAPI extends ApiClient
                 $responseData = $this->sendRequest('sendDocument', [
                     ...$data,
                     'document' => $src,
-                ]);
+                ]);editMessageMedia
             }
 
             if ($hash && ($document = $responseData['document'] ?? null)) {
@@ -230,6 +230,14 @@ class ChatAPI extends ApiClient
             (($old instanceof Video) && !($new instanceof Video))
             ||
             (!($old instanceof Video) && ($new instanceof Video))
+        ) {
+            return false;
+        }
+
+        if (
+            (($old instanceof Document) && !($new instanceof Document))
+            ||
+            (!($old instanceof Document) && ($new instanceof Document))
         ) {
             return false;
         }
@@ -343,6 +351,46 @@ class ChatAPI extends ApiClient
             }
 
             $responseData['video_src'] = $new->videoSrc();
+        } elseif ($old instanceof Document && $new instanceof Document) {
+            if ($old->documentSrc() !== $new->documentSrc()) {
+                $src = $new->documentSrc();
+                $hash = null;
+                if (File::exists($src)) {
+                    $hash = hash_file('sha256', $src);
+                    $cacheSrc = Cache::get('telegram_'.$hash);
+                    $src = $cacheSrc ?: fopen($src, 'r');
+                }
+
+                $responseData = $this->sendRequest('editMessageMedia', [
+                    'chat_id' => $this->chatId,
+                    'message_id' => $old->id(),
+                    'media' => [
+                        'type' => 'video',
+                        'media' => $src,
+                        'caption' => $new->caption(),
+                        'parse_mode' => 'html',
+                    ],
+                    'reply_markup' => $new->inlineKeyboard()?->toArray() ?? ['inline_keyboard' => []]
+                ]);
+
+                if ($hash && ($document = $responseData['document'] ?? null)) {
+                    Cache::set('telegram_'.$hash, $document['file_id'], 86400);
+                }
+            } elseif (
+                ($old->captionSignature() !== $new->captionSignature())
+                ||
+                ($old->replyMarkupSignature() !== $new->replyMarkupSignature())
+            ) {
+                $responseData = $this->sendRequest('editMessageCaption', [
+                    'chat_id' => $this->chatId,
+                    'message_id' => $old->id(),
+                    'caption' => $new->caption(),
+                    'parse_mode' => 'html',
+                    'reply_markup' => $new->inlineKeyboard()?->toArray() ?? ['inline_keyboard' => []]
+                ]);
+            }
+
+            $responseData['document_src'] = $new->documentSrc();
         } else {
             $responseData = $this->sendRequest('editMessageText', [
                 'chat_id' => $this->chatId,
