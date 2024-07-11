@@ -19,7 +19,7 @@ class PollingService extends BaseService
         /** @var TelegramBot $botClass */
         $this->bot = TelegramBot::findOrFail($botId);
         $this->api = new API($this->bot->token);
-        $this->webhookURL = route('telegram.webhook', [
+        $this->webhookURL = route('telegram.execute', [
             'token' => $this->bot->token
         ]);
 
