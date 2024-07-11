@@ -16,25 +16,33 @@ readonly class TelegramRender
     ) {
     }
 
-    public function run(): void
+    public function run(): array
     {
-        match ($this->parser->type()) {
+        return match ($this->parser->type()) {
             'screen' => $this->screen(),
             'mixed' => $this->mixed(),
             'classic' => $this->classic(),
         };
     }
 
-    protected function classic(): void
+    protected function classic(): array
     {
+        $array = [];
+
         foreach ($this->parser->appendMessages as $item) {
             $message = $this->api->send($item);
             $this->stack->push($message);
+
+            $array[] = $message;
         }
+
+        return $array;
     }
 
-    protected function screen(): void
+    protected function screen(): array
     {
+        $array = [];
+
         $stackCursor = 0;
         $parserCursor = 0;
 
@@ -53,6 +61,7 @@ readonly class TelegramRender
                     $deleteMessages[$stackCursor] = $stackMessage->id();
                 } elseif ($newMessage->signature() === $stackMessage->signature()) {
                     $parserCursor++;
+                    $array[] = $stackMessage;
                 } elseif (!$this->api->canEdit($stackMessage, $newMessage)) {
                     $deleteMessages[$stackCursor] = $stackMessage->id();
                 } else {
@@ -61,6 +70,7 @@ readonly class TelegramRender
                         $this->stack->put($stackCursor, $editedMessage);
 
                         $parserCursor++;
+                        $array[] = $editedMessage;
                     } catch (\Exception $e) {
                         Log::error($e);
 
@@ -73,21 +83,30 @@ readonly class TelegramRender
 
                 $message = $this->api->send($newMessage);
                 $this->stack->push($message);
+
+                $array[] = $message;
             } else {
                 break;
             }
         }
 
-        $this->classic();
+        $array = [
+            ...$array,
+            ...$this->classic(),
+        ];
 
         if (count($deleteMessages) > 0) {
             $this->api->try('deleteMessages', array_values($deleteMessages));
             $this->stack->forget(array_keys($deleteMessages));
         }
+
+        return $array;
     }
 
-    protected function mixed(): void
+    protected function mixed(): array
     {
+        $array = [];
+
         $deleteMessages = [];
         $stackMessages = $this->stack->collect();
         $newMessages = $this->parser->screenMessages;
@@ -99,6 +118,8 @@ readonly class TelegramRender
             if ($stackMessage === null || $removeAll) {
                 $message = $this->api->send($newMessage);
                 $this->stack->push($message);
+
+                $array[] = $message;
             } elseif ($stackMessage->signature() !== $newMessage->signature()) {
                 $removeAll = true;
 
@@ -110,14 +131,22 @@ readonly class TelegramRender
 
                 $message = $this->api->send($newMessage);
                 $this->stack->push($message);
+
+                $array[] = $message;
             }
         }
 
-        $this->classic();
+        $array = [
+            ...$array,
+            ...$this->classic(),
+        ];
+        ;
 
         if (count($deleteMessages) > 0) {
             $this->api->try('deleteMessages', array_values($deleteMessages));
             $this->stack->forget(array_keys($deleteMessages));
         }
+
+        return $array;
     }
 }
