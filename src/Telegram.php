@@ -10,7 +10,7 @@ use Mollsoft\Telegram\Services\TelegramRender;
 
 class Telegram
 {
-    public function sendMessage(TelegramChat $chat, View|string $html, ?array &$messages = null): bool
+    public function sendMessage(TelegramChat $chat, View|string $html): array
     {
         if ($html instanceof View) {
             $html = $html->render();
@@ -21,13 +21,11 @@ class Telegram
             $api = $chat->api();
             $parser = new HTMLParser($html);
             $render = new TelegramRender($api, $stack, $parser);
-            $messages = $render->run();
+            return $render->run();
         } catch (\Exception $e) {
             Log::error($e);
-
-            return false;
         }
 
-        return true;
+        return [];
     }
 }
