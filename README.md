@@ -48,6 +48,18 @@ Optionally, you can publish the views using:
 php artisan vendor:publish --tag="telegram-views"
 ```
 
+Optionally, if you use Sail for local development, you need add PHP params `PHP_CLI_SERVER_WORKERS="10"` in file `supervisord.conf`:
+```bash
+[program:php]
+command=%(ENV_SUPERVISOR_PHP_COMMAND)s
+user=%(ENV_SUPERVISOR_PHP_USER)s
+environment=LARAVEL_SAIL="1",PHP_CLI_SERVER_WORKERS="10"
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+```
+
 ## Usage / Использование
 
 Create new Telegram Bot:
