@@ -88,7 +88,7 @@ class API extends ApiClient
         return $this->sendRequest('setMyCommands', compact('commands'))[0];
     }
 
-    public function setMyName(?string $name): bool
+    public function setMyName(string $name): bool
     {
         return $this->sendRequest('setMyName', [
             'name' => $name

@@ -65,7 +65,7 @@ class ChatAPI extends ApiClient
             }
 
             try {
-                $responseData = $this->sendRequest('sendPhoto', [
+                $responseData = $this->sendRequestMultipart('sendPhoto', [
                     ...$data,
                     'photo' => $src,
                 ]);
@@ -75,7 +75,7 @@ class ChatAPI extends ApiClient
                     $src = fopen($src, 'r');
                 }
 
-                $responseData = $this->sendRequest('sendPhoto', [
+                $responseData = $this->sendRequestMultipart('sendPhoto', [
                     ...$data,
                     'photo' => $src,
                 ]);
@@ -100,7 +100,7 @@ class ChatAPI extends ApiClient
             }
 
             try {
-                $responseData = $this->sendRequest('sendVideo', [
+                $responseData = $this->sendRequestMultipart('sendVideo', [
                     ...$data,
                     'video' => $src,
                 ]);
@@ -110,7 +110,7 @@ class ChatAPI extends ApiClient
                     $src = fopen($src, 'r');
                 }
 
-                $responseData = $this->sendRequest('sendVideo', [
+                $responseData = $this->sendRequestMultipart('sendVideo', [
                     ...$data,
                     'video' => $src,
                 ]);
@@ -135,7 +135,7 @@ class ChatAPI extends ApiClient
             }
 
             try {
-                $responseData = $this->sendRequest('sendVideo', [
+                $responseData = $this->sendRequestMultipart('sendVideo', [
                     ...$data,
                     'video' => $src,
                 ]);
@@ -145,7 +145,7 @@ class ChatAPI extends ApiClient
                     $src = fopen($src, 'r');
                 }
 
-                $responseData = $this->sendRequest('sendVideo', [
+                $responseData = $this->sendRequestMultipart('sendVideo', [
                     ...$data,
                     'video' => $src,
                 ]);
@@ -170,7 +170,7 @@ class ChatAPI extends ApiClient
             }
 
             try {
-                $responseData = $this->sendRequest('sendDocument', [
+                $responseData = $this->sendRequestMultipart('sendDocument', [
                     ...$data,
                     'document' => $src,
                 ]);
@@ -180,7 +180,7 @@ class ChatAPI extends ApiClient
                     $src = fopen($src, 'r');
                 }
 
-                $responseData = $this->sendRequest('sendDocument', [
+                $responseData = $this->sendRequestMultipart('sendDocument', [
                     ...$data,
                     'document' => $src,
                 ]);
@@ -196,7 +196,7 @@ class ChatAPI extends ApiClient
                 $data['text'] = $message->text();
             }
 
-            $responseData = $this->sendRequest('sendMessage', $data);
+            $responseData = $this->sendRequestMultipart('sendMessage', $data);
         }
 
         if (isset($data['reply_markup'])) {
@@ -281,7 +281,7 @@ class ChatAPI extends ApiClient
                     $src = $cacheSrc ?: fopen($src, 'r');
                 }
 
-                $responseData = $this->sendRequest('editMessageMedia', [
+                $responseData = $this->sendRequestMultipart('editMessageMedia', [
                     'chat_id' => $this->chatId,
                     'message_id' => $old->id(),
                     'media' => [
@@ -321,7 +321,7 @@ class ChatAPI extends ApiClient
                     $src = $cacheSrc ?: fopen($src, 'r');
                 }
 
-                $responseData = $this->sendRequest('editMessageMedia', [
+                $responseData = $this->sendRequestMultipart('editMessageMedia', [
                     'chat_id' => $this->chatId,
                     'message_id' => $old->id(),
                     'media' => [
@@ -361,7 +361,7 @@ class ChatAPI extends ApiClient
                     $src = $cacheSrc ?: fopen($src, 'r');
                 }
 
-                $responseData = $this->sendRequest('editMessageMedia', [
+                $responseData = $this->sendRequestMultipart('editMessageMedia', [
                     'chat_id' => $this->chatId,
                     'message_id' => $old->id(),
                     'media' => [

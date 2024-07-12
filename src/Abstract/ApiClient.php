@@ -12,6 +12,18 @@ class ApiClient
 
     public function sendRequest(string $method, ?array $data = null, array|string|null $query = null): array
     {
+        $response = $data ? $this->client->post($method, $data) : $this->client->get($method, $query);
+
+        if (!$response->json('ok')) {
+            throw new \Exception($response->json('description', $response->body()));
+        }
+
+        $response = $response->json('result');
+        return is_array($response) ? $response : [$response];
+    }
+
+    public function sendRequestMultipart(string $method, ?array $data = null, array|string|null $query = null): array
+    {
         $request = clone $this->client;
 
         if ($data) {
@@ -24,8 +36,7 @@ class ApiClient
             }
 
             $response = $request->post($method);
-        }
-        else {
+        } else {
             $response = $request->get($method, $query);
         }
 
