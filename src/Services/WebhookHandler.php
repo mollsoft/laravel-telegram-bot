@@ -51,6 +51,7 @@ class WebhookHandler
             ->init($request, $bot)
             ->parseCallbackQuery()
             ->setupChat()
+            ->answerCallbackQuery()
             ->run();
     }
 
@@ -100,6 +101,20 @@ class WebhookHandler
         $this->api = new ChatAPI($this->bot->token, $chat->id());
         $this->stack = new MessageStack($this->chat);
         $this->storage = new Storage(get_class($this->chat).'_'.$this->chat->getKey());
+
+        return $this;
+    }
+
+    protected function answerCallbackQuery(): static
+    {
+        if ($this->callbackQuery) {
+            try {
+                $this->bot
+                    ->api()
+                    ->answerCallbackQuery($this->callbackQuery);
+            } catch (\Exception $e) {
+            }
+        }
 
         return $this;
     }
@@ -210,7 +225,7 @@ class WebhookHandler
             return $this->routeLaunch($targetUri, null, null, $redirects + 1);
         }
 
-        if( !$response->isSuccessful() && view()->exists('telegram::errors.500') ) {
+        if (!$response->isSuccessful() && view()->exists('telegram::errors.500')) {
             return view('telegram::errors.500')->toHtml();
         }
 

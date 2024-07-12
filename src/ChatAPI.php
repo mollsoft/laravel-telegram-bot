@@ -421,30 +421,11 @@ class ChatAPI extends ApiClient
         ])[0];
     }
 
-    public function sendMessage(string $text): SendMessage
-    {
-        return new SendMessage($this, $this->chatId, $text);
-    }
-
     public function sendChatAction(ChatAction $action): bool
     {
         return $this->sendRequest('sendChatAction', [
             'chat_id' => $this->chatId,
             'action' => $action->value,
         ])[0];
-    }
-
-    public function editMessageText(int $messageId, string $text): EditMessageText
-    {
-        return new EditMessageText($this, $this->chatId, $messageId, $text);
-    }
-
-    public function try(string $method, ...$arguments): mixed
-    {
-        try {
-            return call_user_func_array([$this, $method], $arguments);
-        } catch (\Exception) {
-            return false;
-        }
     }
 }

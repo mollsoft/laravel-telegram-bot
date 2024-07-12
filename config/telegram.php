@@ -5,11 +5,14 @@ use Mollsoft\Telegram\DTO\BotCommand;
 return [
     'init' => [
         'default' => [
+            // 'name' => 'Название бота',
+            // 'description' => 'Описание бота',
+            // 'short_description' => 'Короткое описание бота',
             'commands' => [
                 BotCommand::create('start', 'Главное меню'),
                 BotCommand::create('refresh', 'Обновить'),
                 BotCommand::create('back', 'Назад'),
-            ]
+            ],
         ]
     ],
     'page' => [
@@ -20,5 +23,6 @@ return [
     ],
     'webhook' => [
         'background' => false,
+        // запускать обработчик webhook в фоновом режиме (позволяет не создавать очередь в Telegram, требует proc_open).
     ]
 ];

@@ -5,8 +5,8 @@ namespace Mollsoft\Telegram;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Mollsoft\Telegram\Abstract\ApiClient;
-use Mollsoft\Telegram\Builder\SendMessage;
 use Mollsoft\Telegram\DTO\BotCommand;
+use Mollsoft\Telegram\DTO\CallbackQuery;
 use Mollsoft\Telegram\DTO\Update;
 use Mollsoft\Telegram\DTO\User;
 
@@ -75,22 +75,49 @@ class API extends ApiClient
         return array_map(fn(array $item) => Update::fromArray($item), $responseData);
     }
 
-    public function sendMessage(string|int $chatId, string $text): SendMessage
-    {
-        return new SendMessage($this, $chatId, $text);
-    }
-
     public function setMyCommands(BotCommand|array ...$commands): bool
     {
         /** @var BotCommand[] $commands */
         $commands = Arr::flatten($commands);
         $commands = Arr::map($commands, fn(BotCommand $item) => $item->toArray());
 
+        if (count($commands) === 0) {
+            return $this->sendRequest('deleteMyCommands')[0];
+        }
+
         return $this->sendRequest('setMyCommands', compact('commands'))[0];
     }
 
-    public function deleteMyCommands(): bool
+    public function setMyName(?string $name): bool
     {
-        return $this->sendRequest('deleteMyCommands')[0];
+        return $this->sendRequest('setMyName', [
+            'name' => $name
+        ])[0];
+    }
+
+    public function setMyDescription(?string $description): bool
+    {
+        return $this->sendRequest('setMyDescription', [
+            'description' => $description
+        ])[0];
+    }
+
+    public function setMyShortDescription(?string $shortDescription): bool
+    {
+        return $this->sendRequest('setMyDescription', [
+            'short_description' => $shortDescription
+        ])[0];
+    }
+
+    public function answerCallbackQuery(CallbackQuery $callbackQuery, ?string $text = null): bool
+    {
+        $data = [
+            'callback_query_id' => $callbackQuery->id(),
+        ];
+        if ($text) {
+            $data['text'] = $text;
+        }
+
+        return $this->sendRequest('answerCallbackQuery', $data)[0];
     }
 }

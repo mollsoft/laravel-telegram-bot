@@ -5,6 +5,7 @@ namespace Mollsoft\Telegram\Services;
 use Illuminate\Support\Facades\Process;
 use Mollsoft\Telegram\API;
 use Mollsoft\Telegram\DTO\Update;
+use Mollsoft\Telegram\Facades\Telegram;
 use Mollsoft\Telegram\Foundation\BaseService;
 use Mollsoft\Telegram\Models\TelegramBot;
 
@@ -28,11 +29,9 @@ class PollingService extends BaseService
 
     protected function botInit(): static
     {
-        $commands = config('telegram.init.default.commands');
-        if (count($commands) === 0) {
-            $this->api->deleteMyCommands();
-        } else {
-            $this->api->setMyCommands($commands);
+        try {
+            Telegram::init($this->bot);
+        } catch (\Exception $e) {
         }
 
         return $this;

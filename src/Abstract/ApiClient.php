@@ -36,4 +36,13 @@ class ApiClient
         $response = $response->json('result');
         return is_array($response) ? $response : [$response];
     }
+
+    public function try(string $method, ...$arguments): mixed
+    {
+        try {
+            return call_user_func_array([$this, $method], $arguments);
+        } catch (\Exception) {
+            return false;
+        }
+    }
 }

@@ -4,6 +4,7 @@ namespace Mollsoft\Telegram\Commands;
 
 use Illuminate\Console\Command;
 use Mollsoft\Telegram\API;
+use Mollsoft\Telegram\Facades\Telegram;
 use Mollsoft\Telegram\Models\TelegramBot;
 
 class UnsetWebhookCommand extends Command
@@ -25,8 +26,7 @@ class UnsetWebhookCommand extends Command
         $telegramBot = $telegramBots->where('username', $username)->firstOrFail();
 
         try {
-            $api = new API($telegramBot->token);
-            $api->deleteWebhook();
+            Telegram::setWebhook($telegramBot);
 
             $this->info("Webhook successfully unset for Telegram Bot @{$telegramBot->username}!");
         } catch (\Exception $e) {

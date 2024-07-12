@@ -4,6 +4,7 @@ namespace Mollsoft\Telegram\Commands;
 
 use Illuminate\Console\Command;
 use Mollsoft\Telegram\API;
+use Mollsoft\Telegram\Facades\Telegram;
 use Mollsoft\Telegram\Models\TelegramBot;
 
 class SetWebhookCommand extends Command
@@ -29,19 +30,13 @@ class SetWebhookCommand extends Command
                 'token' => $telegramBot->token,
             ]);
 
-            $api = new API($telegramBot->token);
-            $api->setWebhook($url);
+            Telegram::setWebhook($telegramBot, $url);
 
             $this->info("Webhook successfully set for Telegram Bot @{$telegramBot->username}!");
 
-            $commands = config('telegram.init.default.commands');
-            if (count($commands) === 0) {
-                $api->deleteMyCommands();
-            } else {
-                $api->setMyCommands($commands);
-            }
+            Telegram::init($telegramBot);
 
-            $this->info("Commands successfully updated for Telegram Bot @{$telegramBot->username}!");
+            $this->info("Init successfully for Telegram Bot @{$telegramBot->username}!");
         } catch (\Exception $e) {
             $this->error($e->getMessage());
         }
