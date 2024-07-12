@@ -41,7 +41,6 @@ class Telegram
 
         $config = config('telegram.init.'.$init, []);
         foreach ($config as $key => $value) {
-            echo $key."\n";
             switch ($key) {
                 case 'commands':
                     $api->setMyCommands($value);
