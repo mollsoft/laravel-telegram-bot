@@ -4,6 +4,7 @@ namespace Mollsoft\Telegram;
 
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Route;
+use Mollsoft\Telegram\Commands\InitCommand;
 use Mollsoft\Telegram\Commands\NewBotCommand;
 use Mollsoft\Telegram\Commands\PoolingCommand;
 use Mollsoft\Telegram\Commands\SetWebhookCommand;
@@ -35,6 +36,7 @@ class TelegramServiceProvider extends PackageServiceProvider
             ])
             ->hasCommands([
                 NewBotCommand::class,
+                InitCommand::class,
                 SetWebhookCommand::class,
                 UnsetWebhookCommand::class,
                 PoolingCommand::class,

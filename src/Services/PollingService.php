@@ -27,22 +27,11 @@ class PollingService extends BaseService
         return $this;
     }
 
-    protected function botInit(): static
-    {
-        try {
-            Telegram::init($this->bot);
-        } catch (\Exception $e) {
-        }
-
-        return $this;
-    }
-
     public function run(mixed $botId): void
     {
         try {
             $this
-                ->init($botId)
-                ->botInit();
+                ->init($botId);
 
             $this->log("Started polling for Telegram Bot @{$this->bot->username}");
 

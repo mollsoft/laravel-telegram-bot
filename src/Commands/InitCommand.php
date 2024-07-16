@@ -7,11 +7,11 @@ use Mollsoft\Telegram\API;
 use Mollsoft\Telegram\Facades\Telegram;
 use Mollsoft\Telegram\Models\TelegramBot;
 
-class SetWebhookCommand extends Command
+class InitCommand extends Command
 {
-    protected $signature = 'telegram:set-webhook';
+    protected $signature = 'telegram:init';
 
-    protected $description = 'Set Webhook for Telegram Bot';
+    protected $description = 'Init Telegram Bot';
 
     public function handle(): void
     {
@@ -21,18 +21,14 @@ class SetWebhookCommand extends Command
             return;
         }
 
-        $username = $this->choice('Which telegram bot do you want to set?', $telegramBots->pluck('username')->all());
+        $username = $this->choice('Which telegram bot do you want to init?', $telegramBots->pluck('username')->all());
 
         $telegramBot = $telegramBots->where('username', $username)->firstOrFail();
 
         try {
-            $url = route('telegram.webhook', [
-                'token' => $telegramBot->token,
-            ]);
+            Telegram::init($telegramBot);
 
-            Telegram::setWebhook($telegramBot, $url);
-
-            $this->info("Webhook successfully set for Telegram Bot @{$telegramBot->username}!");
+            $this->info("Telegram Bot @{$telegramBot->username} successfully init!");
         } catch (\Exception $e) {
             $this->error($e->getMessage());
         }
