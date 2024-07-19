@@ -17,8 +17,16 @@ class TelegramMiddleware
      */
     public function handle(TelegramRequest $request, Closure $next): mixed
     {
+        if ($redirect = $request->post('redirect')) {
+            return redirect($redirect);
+        }
+
         if ($request->post('start')) {
             return $this->start($request);
+        }
+
+        if ($request->hasText() && mb_strpos($request->text(), '⬅️') === 0) {
+            return redirect()->back();
         }
 
         if ($request->post('back')) {
