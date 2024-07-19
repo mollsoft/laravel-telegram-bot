@@ -24,6 +24,18 @@ class ReplyKeyboard extends DTO
         return $this;
     }
 
+    public function isPersistent(): bool
+    {
+        return $this->get('is_persistent', false);
+    }
+
+    public function setIsPersistent(bool $isPersistent): static
+    {
+        $this->attributes['is_persistent'] = $isPersistent;
+
+        return $this;
+    }
+
     public function button(Button $button, ?int $rowIndex = null): static
     {
         if (!isset($this->attributes['keyboard'])) {

@@ -256,9 +256,8 @@ readonly class HTMLParser
     {
         $replyKeyboard = ReplyKeyboard::make();
 
-        if ($crawler->attr('resize', false)) {
-            $replyKeyboard->setResize(true);
-        }
+        $replyKeyboard->setResize(!!$crawler->attr('resize', true));
+        $replyKeyboard->setIsPersistent(!!$crawler->attr('persistent', true));
 
         $crawler
             ->filter('row')
