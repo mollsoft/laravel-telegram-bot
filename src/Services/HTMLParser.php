@@ -301,7 +301,7 @@ readonly class HTMLParser
                             $callbackData = ['default' => true];
                         }
 
-                        if ($crawler->attr('encode', false)) {
+                        if ($crawler->attr('encode', isset($callbackData['redirect']))) {
                             $data = http_build_query($callbackData);
                             $encodeId = md5($data);
                             Cache::set('telegram_'.$encodeId, $data, 3600);
