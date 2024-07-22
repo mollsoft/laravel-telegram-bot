@@ -49,8 +49,8 @@ class WebhookHandler
     {
         $this
             ->init($request, $bot)
-            ->parseCallbackQuery()
             ->setupChat()
+            ->parseCallbackQuery()
             ->answerCallbackQuery()
             ->run();
     }
@@ -69,12 +69,35 @@ class WebhookHandler
 
     protected function parseCallbackQuery(): static
     {
+        if( !$this->callbackQuery ) {
+            return $this;
+        }
+
         if (
-            ($encodeId = $this->callbackQuery?->getData('encode'))
+            ($encodeId = $this->callbackQuery->getData('encode'))
             &&
             ($encodeData = Cache::get('telegram_'.$encodeId))
         ) {
             $this->callbackQuery->setData($encodeData);
+        }
+
+        $allData = $this->callbackQuery->getAllData();
+        if( count($allData) > 0 ) {
+            foreach ($allData as $key => $value) {
+                if (mb_strpos($key, 'query-') === 0) {
+                    $currentURI = $this->storage->get('uri') ?: '/';
+
+                    $request = Request::create($currentURI);
+                    $currentURI = $request->fullUrlWithQuery([mb_substr($key, 6) => $value]);
+                    $this->storage->set('uri', $currentURI);
+
+                    unset($allData[$key]);
+                }
+            }
+
+            $this->callbackQuery->setData(
+                http_build_query($allData)
+            );
         }
 
         return $this;

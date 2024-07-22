@@ -103,6 +103,48 @@ php artisan telegram:pooling [BOT_ID]
 ```
 
 
+### Inline Keyboard
+
+If you want create button for change current URI query params, use this template:
+
+```html
+<inline-keyboard>
+    <row>
+        <column query-param="value">Change query param</column>
+    </row>
+</inline-keyboard>
+```
+
+If you want send POST data you must use this template:
+
+```html
+<inline-keyboard>
+    <row>
+        <column data-field="value">Send field value</column>
+    </row>
+</inline-keyboard>
+```
+
+If you POST data is long, you can encrypt using this template:
+
+```html
+<inline-keyboard>
+    <row>
+        <column data-field="long value" encode="true">Encoded send data</column>
+    </row>
+</inline-keyboard>
+```
+
+If you want make redirect to another page from button, use this template:
+
+```html
+<inline-keyboard>
+    <row>
+        <column data-redirect="/">Redirect to /</column>
+    </row>
+</inline-keyboard>
+```
+
 ## Testing / Тестирование
 
 ```bash

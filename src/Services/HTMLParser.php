@@ -295,6 +295,9 @@ readonly class HTMLParser
                             if (mb_strpos($attribute->nodeName, 'data-') === 0) {
                                 $callbackData[mb_substr($attribute->nodeName, 5)] = $attribute->nodeValue;
                             }
+                            elseif(mb_strpos($attribute->nodeName, 'query-') === 0) {
+                                $callbackData[$attribute->nodeName] = $attribute->nodeValue;
+                            }
                         }
 
                         if (count($callbackData) === 0) {
