@@ -19,19 +19,6 @@ class TelegramServiceProvider extends ServiceProvider
 {
     public function boot(Router $router): void
     {
-        if (!Route::hasMacro('telegram')) {
-            Route::macro('telegram', function ($url, $action) {
-                /* @var Router $this */
-                $router = $this->match(['TELEGRAM'], $url.'/{method?}', $action);
-                $router->where('method', 'TELEGRAM');
-                return $router;
-            });
-        }
-
-        $this->loadViewsFrom(resource_path('views/telegram'), 'telegram');
-
-        $this->app->register(RouteServiceProvider::class);
-
         $router->aliasMiddleware('auth', Authenticate::class);
         $router->aliasMiddleware('guest', RedirectIfAuthenticated::class);
 

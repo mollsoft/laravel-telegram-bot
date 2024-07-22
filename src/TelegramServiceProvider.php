@@ -19,6 +19,7 @@ class TelegramServiceProvider extends PackageServiceProvider
     public function boot(): static
     {
         $this->app->register(RouteServiceProvider::class);
+        $this->app->register(TelegramServiceProvider::class);
 
         return parent::boot();
     }
@@ -57,5 +58,6 @@ class TelegramServiceProvider extends PackageServiceProvider
         $this->loadViewsFrom(resource_path('views/telegram'), 'telegram');
 
         $this->app->register(RouteServiceProvider::class);
+        $this->app->register(TelegramServiceProvider::class);
     }
 }
