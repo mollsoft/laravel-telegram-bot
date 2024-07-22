@@ -33,6 +33,7 @@ class TelegramServiceProvider extends PackageServiceProvider
             ->hasMigrations([
                 'create_telegram_bots_table',
                 'create_telegram_chats_table',
+                'create_telegram_users_table',
             ])
             ->hasCommands([
                 NewBotCommand::class,
