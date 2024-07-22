@@ -60,6 +60,19 @@ stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
 ```
 
+You can use Laravel Auth, edit file `config/auth.php` and edit section `guards`:
+```php
+'guards' => [
+        'web' => [...],
+        'telegram' => [
+            'driver' => 'telegram',
+            'provider' => 'users',
+        ]
+    ],
+```
+
+After this you can use middleware `auth:telegram` in your routes.
+
 ## Usage / Использование
 
 Create new Telegram Bot:
