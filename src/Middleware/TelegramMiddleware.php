@@ -25,8 +25,8 @@ class TelegramMiddleware
             return $this->start($request);
         }
 
-        if ($request->hasText() && mb_strpos($request->text(), '⬅️') === 0) {
-            return redirect()->back();
+        if ($request->post('home')) {
+            return redirect('/');
         }
 
         if ($request->post('back')) {
@@ -37,16 +37,30 @@ class TelegramMiddleware
             $request->setCallbackQuery(null);
         }
 
-        switch ($request->text()) {
-            case '/start':
-                return $this->start($request);
+        if( $request->hasText() ) {
+            foreach( config('telegram.reactions', [] ) as $key => $values ) {
+                $has = false;
+                foreach( $values as $value ) {
+                    if( mb_strpos($request->text(), $value) === 0 ) {
+                        $has = true;
+                        break;
+                    }
+                }
+                switch( $has ? $key : null ) {
+                    case 'start':
+                        return $this->start($request);
 
-            case '/back':
-                return redirect()->back();
+                    case 'home':
+                        return redirect('/');
 
-            case '/refresh':
-                $request->setText(null);
-                break;
+                    case 'back':
+                        return redirect()->back();
+
+                    case 'refresh':
+                        $request->setText(null);
+                        break;
+                }
+            }
         }
 
         return $next($request);
