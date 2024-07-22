@@ -15,7 +15,7 @@ use Mollsoft\Telegram\Middleware\Authenticate;
 use Mollsoft\Telegram\Middleware\RedirectIfAuthenticated;
 use Mollsoft\Telegram\TelegramGuard;
 
-class TelegramServiceProvider extends ServiceProvider
+class AuthServiceProvider extends ServiceProvider
 {
     public function boot(Router $router): void
     {

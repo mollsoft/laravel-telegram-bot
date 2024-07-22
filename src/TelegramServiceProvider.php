@@ -2,13 +2,12 @@
 
 namespace Mollsoft\Telegram;
 
-use Illuminate\Routing\Router;
-use Illuminate\Support\Facades\Route;
 use Mollsoft\Telegram\Commands\InitCommand;
 use Mollsoft\Telegram\Commands\NewBotCommand;
 use Mollsoft\Telegram\Commands\PoolingCommand;
 use Mollsoft\Telegram\Commands\SetWebhookCommand;
 use Mollsoft\Telegram\Commands\UnsetWebhookCommand;
+use Mollsoft\Telegram\Providers\AuthServiceProvider;
 use Mollsoft\Telegram\Providers\RouteServiceProvider;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
@@ -19,7 +18,7 @@ class TelegramServiceProvider extends PackageServiceProvider
     public function boot(): static
     {
         $this->app->register(RouteServiceProvider::class);
-        $this->app->register(TelegramServiceProvider::class);
+        $this->app->register(AuthServiceProvider::class);
 
         return parent::boot();
     }
@@ -58,6 +57,6 @@ class TelegramServiceProvider extends PackageServiceProvider
         $this->loadViewsFrom(resource_path('views/telegram'), 'telegram');
 
         $this->app->register(RouteServiceProvider::class);
-        $this->app->register(TelegramServiceProvider::class);
+        $this->app->register(AuthServiceProvider::class);
     }
 }
