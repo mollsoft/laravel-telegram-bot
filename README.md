@@ -151,6 +151,13 @@ If you want make redirect to another page from button, use this template:
 composer test
 ```
 
+## Ideas / Идеи
+
+1. В Inline Button сделать параметр `query-history=false` что бы по нему текущий URL не сохранялся в referer и при back не выполнялся сброс формы - а был возврат назад.
+2. Возможность загрузки пользователями фото/видео/документы и парсинг capture в message.
+3. В Reply Button сделать кнопку отправки номера телефона + получение результатов в TelegramRequest.
+4. Чтение результата пересланного контакта в TelegramRequest.
+
 ## Changelog / Логи изменений
 
 Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
