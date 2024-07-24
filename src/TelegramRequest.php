@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Mollsoft\Telegram;
 
 use Mollsoft\Telegram\DTO\CallbackQuery;
+use Mollsoft\Telegram\DTO\Message\Photo;
+use Mollsoft\Telegram\DTO\PhotoSize;
 use Mollsoft\Telegram\Models\TelegramBot;
 use Mollsoft\Telegram\Models\TelegramChat;
 use Symfony\Component\HttpFoundation\InputBag;
@@ -16,8 +18,9 @@ class TelegramRequest extends \Illuminate\Http\Request
     protected ChatAPI $api;
     protected Storage $storage;
     protected MessageStack $stack;
-    protected ?string $text;
-    protected ?CallbackQuery $callbackQuery;
+    protected ?string $text = null;
+    protected ?CallbackQuery $callbackQuery = null;
+    protected ?PhotoSize $photoSize = null;
 
     public static function createFromTelegram(
         TelegramBot $bot,
@@ -25,6 +28,7 @@ class TelegramRequest extends \Illuminate\Http\Request
         string $uri,
         ?string $text = null,
         ?CallbackQuery $callbackQuery = null,
+        ?PhotoSize $photo = null,
     ): static {
         return static::create(
             uri: $uri,
@@ -34,7 +38,20 @@ class TelegramRequest extends \Illuminate\Http\Request
             ->setBot($bot)
             ->setChat($chat)
             ->setText($text)
-            ->setCallbackQuery($callbackQuery);
+            ->setCallbackQuery($callbackQuery)
+            ->setPhoto($photo);
+    }
+
+    public function setPhoto(?PhotoSize $photoSize): static
+    {
+        $this->photoSize = $photoSize;
+
+        return $this;
+    }
+
+    public function photo(): ?PhotoSize
+    {
+        return $this->photoSize;
     }
 
     public function setBot(TelegramBot $bot): static

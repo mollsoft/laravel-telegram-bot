@@ -16,8 +16,10 @@ use Mollsoft\Telegram\ChatAPI;
 use Mollsoft\Telegram\DTO\CallbackQuery;
 use Mollsoft\Telegram\DTO\Chat;
 use Mollsoft\Telegram\DTO\Message;
+use Mollsoft\Telegram\DTO\PhotoSize;
 use Mollsoft\Telegram\DTO\Update;
 use Mollsoft\Telegram\Enums\ChatAction;
+use Mollsoft\Telegram\Interfaces\HasCaption;
 use Mollsoft\Telegram\MessageStack;
 use Mollsoft\Telegram\Models\TelegramBot;
 use Mollsoft\Telegram\Models\TelegramChat;
@@ -185,7 +187,12 @@ class WebhookHandler
         if ($this->message?->text() === '/start' || $this->callbackQuery?->hasData('start')) {
             $uri = '/';
         }
-        $content = $this->routeLaunch($uri, $this->message?->text(), $this->callbackQuery);
+        $text = $this->message?->text();
+        if( !$text && ($this->message instanceof HasCaption) ) {
+            $text = $this->message->caption();
+        }
+
+        $content = $this->routeLaunch($uri, $text, $this->callbackQuery);
         $this->render($content);
     }
 
@@ -207,12 +214,21 @@ class WebhookHandler
         ?CallbackQuery $callbackQuery,
         int $redirects = 0
     ): ?string {
+        $photo = null;
+        if( $this->message instanceof Message\Photo ) {
+            $photo = $this->message
+                ->photo()
+                ->sortByDesc(fn(PhotoSize $item) => $item->width())
+                ->first();
+        }
+
         $request = TelegramRequest::createFromTelegram(
             bot: $this->bot,
             chat: $this->chat,
             uri: $uri,
             text: $text,
             callbackQuery: $callbackQuery,
+            photo: $photo,
         );
 
         $referer = $this

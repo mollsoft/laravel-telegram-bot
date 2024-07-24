@@ -4,8 +4,9 @@ namespace Mollsoft\Telegram\DTO\Message;
 
 
 use Mollsoft\Telegram\DTO\Message;
+use Mollsoft\Telegram\Interfaces\HasCaption;
 
-class Document extends Message
+class Document extends Message implements HasCaption
 {
     public function documentSrc(): ?string
     {

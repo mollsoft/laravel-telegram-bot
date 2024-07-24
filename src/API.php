@@ -9,11 +9,16 @@ use Mollsoft\Telegram\DTO\BotCommand;
 use Mollsoft\Telegram\DTO\CallbackQuery;
 use Mollsoft\Telegram\DTO\Update;
 use Mollsoft\Telegram\DTO\User;
+use Mollsoft\Telegram\Interfaces\IsFile;
 
 class API extends ApiClient
 {
+    protected readonly string $token;
+
     public function __construct(string $token)
     {
+        $this->token = $token;
+
         $client = Http::baseUrl("https://api.telegram.org/bot$token/")
             ->connectTimeout(20)
             ->timeout(60);
@@ -119,5 +124,18 @@ class API extends ApiClient
         }
 
         return $this->sendRequest('answerCallbackQuery', $data)[0];
+    }
+
+    public function getFileLink(IsFile $file): string
+    {
+        $data = $this->sendRequest('getFile', [
+            'file_id' => $file->fileId(),
+        ]);
+
+        if (!isset($data['file_path'])) {
+            throw new \Exception(print_r($data, true));
+        }
+
+        return 'https://api.telegram.org/file/bot'.$this->token.'/'.$data['file_path'];
     }
 }

@@ -4,8 +4,9 @@ namespace Mollsoft\Telegram\DTO\Message;
 
 
 use Mollsoft\Telegram\DTO\Message;
+use Mollsoft\Telegram\Interfaces\HasCaption;
 
-class Video extends Message
+class Video extends Message implements HasCaption
 {
     public function videoSrc(): ?string
     {

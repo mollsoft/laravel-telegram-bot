@@ -6,8 +6,9 @@ namespace Mollsoft\Telegram\DTO\Message;
 use Illuminate\Support\Collection;
 use Mollsoft\Telegram\DTO\Message;
 use Mollsoft\Telegram\DTO\PhotoSize;
+use Mollsoft\Telegram\Interfaces\HasCaption;
 
-class Photo extends Message
+class Photo extends Message implements HasCaption
 {
     /**
      * @return ?Collection<PhotoSize>

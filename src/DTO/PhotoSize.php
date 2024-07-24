@@ -3,8 +3,9 @@
 namespace Mollsoft\Telegram\DTO;
 
 use Mollsoft\Telegram\Abstract\DTO;
+use Mollsoft\Telegram\Interfaces\IsFile;
 
-class PhotoSize extends DTO
+class PhotoSize extends DTO implements IsFile
 {
     protected function required(): array
     {
