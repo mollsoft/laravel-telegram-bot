@@ -3,7 +3,7 @@
 namespace Mollsoft\Telegram\Middleware;
 
 use Illuminate\Http\Request;
-use Mollsoft\Telegram\Foundation\TelegramRequest;
+use Mollsoft\Telegram\TelegramRequest;
 
 class Authenticate extends \Illuminate\Auth\Middleware\Authenticate
 {

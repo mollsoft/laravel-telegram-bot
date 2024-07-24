@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Mollsoft\Telegram\Exceptions\RedirectException;
-use Mollsoft\Telegram\Foundation\TelegramRequest;
 
 class Form
 {

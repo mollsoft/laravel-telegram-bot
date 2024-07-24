@@ -4,7 +4,7 @@ namespace Mollsoft\Telegram\Middleware;
 
 use Closure;
 use Mollsoft\Telegram\DTO\Message;
-use Mollsoft\Telegram\Foundation\TelegramRequest;
+use Mollsoft\Telegram\TelegramRequest;
 
 class TelegramMiddleware
 {

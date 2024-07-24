@@ -18,13 +18,12 @@ use Mollsoft\Telegram\DTO\Chat;
 use Mollsoft\Telegram\DTO\Message;
 use Mollsoft\Telegram\DTO\Update;
 use Mollsoft\Telegram\Enums\ChatAction;
-use Mollsoft\Telegram\Foundation\TelegramRequest;
 use Mollsoft\Telegram\MessageStack;
 use Mollsoft\Telegram\Models\TelegramBot;
 use Mollsoft\Telegram\Models\TelegramChat;
 use Mollsoft\Telegram\Storage;
+use Mollsoft\Telegram\TelegramRequest;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
 class WebhookHandler
 {

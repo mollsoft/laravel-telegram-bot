@@ -7,7 +7,6 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Support\Traits\Macroable;
-use Mollsoft\Telegram\Foundation\TelegramRequest;
 use Mollsoft\Telegram\Models\TelegramUser;
 
 class TelegramGuard implements StatefulGuard

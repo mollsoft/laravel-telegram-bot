@@ -2,14 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Mollsoft\Telegram\Foundation;
+namespace Mollsoft\Telegram;
 
-use Mollsoft\Telegram\ChatAPI;
 use Mollsoft\Telegram\DTO\CallbackQuery;
-use Mollsoft\Telegram\MessageStack;
 use Mollsoft\Telegram\Models\TelegramBot;
 use Mollsoft\Telegram\Models\TelegramChat;
-use Mollsoft\Telegram\Storage;
 use Symfony\Component\HttpFoundation\InputBag;
 
 class TelegramRequest extends \Illuminate\Http\Request

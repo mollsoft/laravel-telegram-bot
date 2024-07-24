@@ -4,7 +4,7 @@ namespace Mollsoft\Telegram\Middleware;
 
 use Closure;
 use Illuminate\Http\Response;
-use Mollsoft\Telegram\Foundation\TelegramRequest;
+use Mollsoft\Telegram\TelegramRequest;
 
 class NotFoundMiddleware
 {

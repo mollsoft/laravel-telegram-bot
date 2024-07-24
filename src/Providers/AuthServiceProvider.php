@@ -8,12 +8,11 @@ namespace Mollsoft\Telegram\Providers;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
-use Mollsoft\Telegram\Foundation\TelegramRequest;
 use Mollsoft\Telegram\Middleware\Authenticate;
 use Mollsoft\Telegram\Middleware\RedirectIfAuthenticated;
 use Mollsoft\Telegram\TelegramGuard;
+use Mollsoft\Telegram\TelegramRequest;
 
 class AuthServiceProvider extends ServiceProvider
 {
