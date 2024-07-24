@@ -8,6 +8,13 @@ use Mollsoft\Telegram\Interfaces\HasCaption;
 
 class Document extends Message implements HasCaption
 {
+    public function document(): ?\Mollsoft\Telegram\DTO\Document
+    {
+        $value = $this->get('document');
+
+        return is_array($value) ? \Mollsoft\Telegram\DTO\Document::fromArray($value) : null;
+    }
+
     public function documentSrc(): ?string
     {
         return $this->get('document_src');

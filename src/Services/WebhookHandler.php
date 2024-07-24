@@ -222,6 +222,11 @@ class WebhookHandler
                 ->first();
         }
 
+        $document = null;
+        if( $this->message instanceof Message\Document ) {
+            $document = $this->message->document();
+        }
+
         $request = TelegramRequest::createFromTelegram(
             bot: $this->bot,
             chat: $this->chat,
@@ -229,6 +234,7 @@ class WebhookHandler
             text: $text,
             callbackQuery: $callbackQuery,
             photo: $photo,
+            document: $document,
         );
 
         $referer = $this
