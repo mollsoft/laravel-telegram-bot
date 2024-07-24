@@ -82,7 +82,7 @@ class ChatAPI extends ApiClient
             }
 
             if ($hash && ($photo = $responseData['photo'] ?? null)) {
-                Cache::set('telegram_'.$hash, $photo[count($photo) - 1]['file_id'], 86400);
+                Cache::set('telegram_'.$hash, $photo[count($photo) - 1]['file_id'], (int)config('telegram.cache.ttl', 86400));
             }
 
             $responseData['photo_src'] = $message->photoSrc();
@@ -117,7 +117,7 @@ class ChatAPI extends ApiClient
             }
 
             if ($hash && ($video = $responseData['video'] ?? null)) {
-                Cache::set('telegram_'.$hash, $video['file_id'], 86400);
+                Cache::set('telegram_'.$hash, $video['file_id'], (int)config('telegram.cache.ttl', 86400));
             }
 
             $responseData['video_src'] = $message->videoSrc();
@@ -152,7 +152,7 @@ class ChatAPI extends ApiClient
             }
 
             if ($hash && ($video = $responseData['video'] ?? null)) {
-                Cache::set('telegram_'.$hash, $video['file_id'], 86400);
+                Cache::set('telegram_'.$hash, $video['file_id'], (int)config('telegram.cache.ttl', 86400));
             }
 
             $responseData['video_src'] = $message->videoSrc();
@@ -187,7 +187,7 @@ class ChatAPI extends ApiClient
             }
 
             if ($hash && ($document = $responseData['document'] ?? null)) {
-                Cache::set('telegram_'.$hash, $document['file_id'], 86400);
+                Cache::set('telegram_'.$hash, $document['file_id'], (int)config('telegram.cache.ttl', 86400));
             }
 
             $responseData['document_src'] = $message->documentSrc();
@@ -294,7 +294,7 @@ class ChatAPI extends ApiClient
                 ]);
 
                 if ($hash && ($photo = $responseData['photo'] ?? null)) {
-                    Cache::set('telegram_'.$hash, $photo[count($photo) - 1]['file_id'], 86400);
+                    Cache::set('telegram_'.$hash, $photo[count($photo) - 1]['file_id'], (int)config('telegram.cache.ttl', 86400));
                 }
             } elseif (
                 ($old->captionSignature() !== $new->captionSignature())
@@ -334,7 +334,7 @@ class ChatAPI extends ApiClient
                 ]);
 
                 if ($hash && ($video = $responseData['video'] ?? null)) {
-                    Cache::set('telegram_'.$hash, $video['file_id'], 86400);
+                    Cache::set('telegram_'.$hash, $video['file_id'], (int)config('telegram.cache.ttl', 86400));
                 }
             } elseif (
                 ($old->captionSignature() !== $new->captionSignature())
@@ -374,7 +374,7 @@ class ChatAPI extends ApiClient
                 ]);
 
                 if ($hash && ($document = $responseData['document'] ?? null)) {
-                    Cache::set('telegram_'.$hash, $document['file_id'], 86400);
+                    Cache::set('telegram_'.$hash, $document['file_id'], (int)config('telegram.cache.ttl', 86400));
                 }
             } elseif (
                 ($old->captionSignature() !== $new->captionSignature())

@@ -30,5 +30,9 @@ return [
     'webhook' => [
         'background' => false,
         // запускать обработчик webhook в фоновом режиме (позволяет не создавать очередь в Telegram, требует proc_open).
+    ],
+    'cache' => [
+        'ttl' => 86400,
+        'encode_ttl' => 3 * 24 * 60 * 60,
     ]
 ];
