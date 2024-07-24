@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 use Mollsoft\Telegram\ChatAPI;
 use Mollsoft\Telegram\DTO\CallbackQuery;
 use Mollsoft\Telegram\DTO\Chat;
+use Mollsoft\Telegram\DTO\Document;
 use Mollsoft\Telegram\DTO\Message;
 use Mollsoft\Telegram\DTO\PhotoSize;
 use Mollsoft\Telegram\DTO\Update;
@@ -192,7 +193,20 @@ class WebhookHandler
             $text = $this->message->caption();
         }
 
-        $content = $this->routeLaunch($uri, $text, $this->callbackQuery);
+        $photo = null;
+        if( $this->message instanceof Message\Photo ) {
+            $photo = $this->message
+                ->photo()
+                ->sortByDesc(fn(PhotoSize $item) => $item->width())
+                ->first();
+        }
+
+        $document = null;
+        if( $this->message instanceof Message\Document ) {
+            $document = $this->message->document();
+        }
+
+        $content = $this->routeLaunch($uri, $text, $this->callbackQuery, 0, $photo, $document);
         $this->render($content);
     }
 
@@ -212,21 +226,10 @@ class WebhookHandler
         string $uri,
         ?string $text,
         ?CallbackQuery $callbackQuery,
-        int $redirects = 0
+        int $redirects = 0,
+        ?PhotoSize $photo = null,
+        ?Document $document = null,
     ): ?string {
-        $photo = null;
-        if( $this->message instanceof Message\Photo ) {
-            $photo = $this->message
-                ->photo()
-                ->sortByDesc(fn(PhotoSize $item) => $item->width())
-                ->first();
-        }
-
-        $document = null;
-        if( $this->message instanceof Message\Document ) {
-            $document = $this->message->document();
-        }
-
         $request = TelegramRequest::createFromTelegram(
             bot: $this->bot,
             chat: $this->chat,
