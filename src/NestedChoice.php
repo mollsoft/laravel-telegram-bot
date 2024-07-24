@@ -6,20 +6,47 @@ use Illuminate\Support\Collection;
 
 class NestedChoice
 {
-    protected ?array $value;
     protected Collection $levels, $selected;
     protected mixed $item = null;
-    protected string $separator = '-';
     protected bool $isEnd;
 
-    public function __construct(protected readonly array $data, ?string $value = null)
+    protected readonly Collection $dataMap;
+    protected ?array $valuePath = null;
+
+    public function __construct(
+        protected readonly array $data,
+        protected ?string $value = null,
+        protected readonly bool $isKeyUnique = false,
+        protected readonly string $separator = '-'
+    ) {
+        $this->dataMap = collect();
+        $this
+            ->mapData($this->data)
+            ->setValue($this->value);
+    }
+
+    protected function mapData(array $items, array $path = []): static
     {
-        $this->setValue($value);
+        foreach ($items as $key => $item) {
+            $currentPath = array_merge($path, [$key]);
+            $currentKey = $this->isKeyUnique ? $key : implode('-', $currentPath);
+            $this->dataMap->put($currentKey, $currentPath);
+
+            if (isset($item['children'])) {
+                $this->mapData($item['children'], $currentPath);
+            }
+        }
+
+        return $this;
     }
 
     public function setValue(mixed $value): static
     {
-        $this->value = !is_null($value) && $value !== '' ? explode($this->separator, $value) : null;
+        $this->value = !is_null($value) && $value !== '' ? (string)$value : null;
+        if( $this->value !== null && !$this->dataMap->has($this->value) ) {
+            $this->value = null;
+        }
+        $this->valuePath = $this->value !== null ? $this->dataMap->get($this->value) : null;
 
         $this
             ->initLevels()
@@ -42,18 +69,18 @@ class NestedChoice
         }
         $this->levels->push($items);
 
-        if ($this->value) {
+        if ($this->valuePath) {
             $prefix = '';
-            foreach ($this->value as $value) {
-                $prefix .= $value.'-';
-                if (!isset($data[$value]['children'])) {
+            foreach( $this->valuePath as $path ) {
+                $prefix .= $path.'-';
+                if( !isset($data[$path]['children']) ) {
                     break;
                 }
-                $data = $data[$value]['children'];
+                $data = $data[$path]['children'];
 
                 $items = collect();
                 foreach ($data as $i => $item) {
-                    $items->put($prefix.$i, $item['item']);
+                    $items->put($this->isKeyUnique ? $i : $prefix.$i, $item['item']);
                 }
                 $this->levels->push($items);
             }
@@ -66,16 +93,16 @@ class NestedChoice
     {
         $this->selected = collect();
 
-        if ($this->value) {
+        if ($this->valuePath) {
             $data = $this->data;
 
-            foreach ($this->value as $value) {
-                if (!isset($data[$value])) {
+            foreach ($this->valuePath as $path) {
+                if (!isset($data[$path])) {
                     break;
                 }
 
-                $this->selected->push($data[$value]['item']);
-                $data = $data[$value]['children'] ?? [];
+                $this->selected->push($data[$path]['item']);
+                $data = $data[$path]['children'] ?? [];
             }
         }
 
@@ -88,18 +115,16 @@ class NestedChoice
 
         $data = $this->data;
 
-        if ($this->value) {
-            foreach ($this->value as $value) {
-                if (isset($data['children'])) {
-                    $data = $data['children'];
-                }
-
-                if (!isset($data[$value])) {
-                    return $this;
-                }
-
-                $data = $data[$value];
+        foreach ($this->valuePath ?? [] as $path) {
+            if (isset($data['children'])) {
+                $data = $data['children'];
             }
+
+            if (!isset($data[$path])) {
+                return $this;
+            }
+
+            $data = $data[$path];
         }
 
         $this->item = $data['item'] ?? null;
@@ -113,15 +138,13 @@ class NestedChoice
 
         $data = $this->data;
 
-        if ($this->value) {
-            foreach ($this->value as $value) {
-                if (!isset($data[$value])) {
-                    $this->isEnd = true;
-                    return $this;
-                }
-
-                $data = $data[$value]['children'] ?? $data[$value];
+        foreach ($this->valuePath ?? [] as $path) {
+            if (!isset($data[$path])) {
+                $this->isEnd = true;
+                return $this;
             }
+
+            $data = $data[$path]['children'] ?? $data[$path];
         }
 
         if (!isset($data['item']) || isset($data['children'])) {
@@ -133,35 +156,29 @@ class NestedChoice
         return $this;
     }
 
-    public function setSeparator(string $separator): static
+    public static function fromTree(Collection $tree, ?string $value = null, ?string $uniqueKeyBy = null): static
     {
-        $this->separator = $separator;
+        $data = static::formatedTree($tree, $uniqueKeyBy);
 
-        $this->setValue(
-            $this->value()
-        );
-
-        return $this;
+        return new static($data, $value, $uniqueKeyBy !== null);
     }
 
-    public static function fromTree(Collection $tree, ?string $value = null): static
-    {
-        $data = static::formatedTree($tree);
-
-        return new static($data, $value);
-    }
-
-    protected static function formatedTree(Collection $collection): array
+    protected static function formatedTree(Collection $collection, ?string $uniqueKeyBy = null): array
     {
         $result = [];
 
         foreach ($collection as $i => $item) {
-            $result[$i] = [
+            $key = $i;
+            if ($uniqueKeyBy) {
+                $key = $item->$uniqueKeyBy;
+            }
+
+            $result[$key] = [
                 'item' => $item,
             ];
 
             if ($item->children->count()) {
-                $result[$i]['children'] = static::formatedTree($item->children);
+                $result[$key]['children'] = static::formatedTree($item->children, $uniqueKeyBy);
             }
         }
 
@@ -170,7 +187,7 @@ class NestedChoice
 
     public function value(): ?string
     {
-        return $this->value ? implode($this->separator, $this->value) : null;
+        return $this->value;
     }
 
     public function levels(): Collection
@@ -182,20 +199,18 @@ class NestedChoice
     {
         $collection = collect();
 
-        if ($this->value) {
-            $data = $this->data;
+        $data = $this->data;
 
-            foreach ($this->value as $i => $value) {
-                if ($level !== null && $i >= $level) {
-                    break;
-                }
-                if (!isset($data[$value])) {
-                    break;
-                }
-
-                $collection->push($data[$value]['item']);
-                $data = $data[$value]['children'] ?? [];
+        foreach ($this->valuePath ?? [] as $i => $path) {
+            if ($level !== null && $i >= $level) {
+                break;
             }
+            if (!isset($data[$path])) {
+                break;
+            }
+
+            $collection->push($data[$path]['item']);
+            $data = $data[$path]['children'] ?? [];
         }
 
         return $collection;
@@ -218,12 +233,20 @@ class NestedChoice
 
     public function backValue(): ?string
     {
-        $values = $this->value ?? [];
+        $values = $this->valuePath ?? [];
 
         if (count($values) > 0) {
             unset($values[count($values) - 1]);
         }
 
-        return count($values) > 0 ? implode($this->separator, $values) : null;
+        if( empty($values) ) {
+            return null;
+        }
+
+        if( $this->isKeyUnique ) {
+            return end($values);
+        }
+
+        return implode($this->separator, $values);
     }
 }
