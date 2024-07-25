@@ -2,6 +2,7 @@
 
 namespace Mollsoft\Telegram\Services;
 
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Log;
 use Mollsoft\Telegram\ChatAPI;
 use Mollsoft\Telegram\DTO\Message;
@@ -9,11 +10,14 @@ use Mollsoft\Telegram\MessageStack;
 
 readonly class TelegramRender
 {
+    protected readonly int $screenTTL;
+
     public function __construct(
         protected ChatAPI $api,
         protected MessageStack $stack,
         protected HTMLParser $parser
     ) {
+        $this->screenTTL = (int)config('telegram.screen.ttl', 86400);
     }
 
     public function run(): array
@@ -62,7 +66,7 @@ readonly class TelegramRender
                 } elseif ($newMessage->signature() === $stackMessage->signature()) {
                     $parserCursor++;
                     $array[] = $stackMessage;
-                } elseif (!$this->api->canEdit($stackMessage, $newMessage)) {
+                } elseif (Date::now()->diffInSeconds($stackMessage->date()) >= $this->screenTTL || !$this->api->canEdit($stackMessage, $newMessage)) {
                     $deleteMessages[$stackCursor] = $stackMessage->id();
                 } else {
                     try {

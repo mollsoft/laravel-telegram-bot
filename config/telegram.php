@@ -38,6 +38,9 @@ return [
         'ttl' => 86400,
         'encode_ttl' => 3 * 24 * 60 * 60,
     ],
+    'screen' => [
+        'ttl' => 86400,
+    ],
     'models' => [
         'bot' => \Mollsoft\Telegram\Models\TelegramBot::class,
         'chat' => \Mollsoft\Telegram\Models\TelegramChat::class,
