@@ -16,16 +16,18 @@ class TruncateCommand extends Command
 
     protected $description = 'Truncate dialogs for telegram bots';
 
+    protected int $screenTruncate;
+
     public function handle(): void
     {
-        $screenTruncate = (int)config('telegram.screen.truncate', 0);
-        if ($screenTruncate > 0) {
+        $this->screenTruncate = (int)config('telegram.screen.truncate', 0);
+
+        if ($this->screenTruncate > 0) {
             /** @var class-string<TelegramChat> $model */
             $model = Telegram::chatModel();
 
             $model::query()
                 ->with('bot')
-                ->where('updated_at', '<', Date::now()->subSeconds($screenTruncate))
                 ->each(function (TelegramChat $chat) {
                     try {
                         if( $this->eachChat($chat) ) {
@@ -47,20 +49,20 @@ class TruncateCommand extends Command
 
             $deleteMessages = $stack
                 ->collect()
+                ->filter(fn(Message $item) => $item->id() !== $mainMessage?->id() && abs(Date::now()->diffInSeconds($item->date())) >= $this->screenTruncate )
                 ->map(fn(Message $item) => $item->id())
-                ->filter(fn($id) => $id !== $mainMessage?->id())
-                ->all();
-            if( count($deleteMessages) ) {
+                ->filter(fn($id) => $id !== $mainMessage?->id());
+
+            $saveMessages = $stack->collect()
+                ->filter(fn(Message $item) => $item->id() === $mainMessage?->id() || abs(Date::now()->diffInSeconds($item->date())) < $this->screenTruncate );
+
+            if( $deleteMessages->count() ) {
                 $chat->api()->deleteMessages($deleteMessages);
                 $stack->truncate();
 
-                if ($mainMessage) {
-                    $stack->push($mainMessage);
+                foreach( $saveMessages as $message ) {
+                    $stack->push($message);
                 }
-
-                $chat->update([
-                    'updated_at' => Date::now()
-                ]);
 
                 return true;
             }
