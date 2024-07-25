@@ -22,4 +22,16 @@ class Button extends DTO
 
         return $this;
     }
+
+    public function requestContact(): bool
+    {
+        return !!$this->get('request_contact', false);
+    }
+
+    public function setRequestContact(bool $requestContact): static
+    {
+        $this->attributes['request_contact'] = $requestContact;
+
+        return $this;
+    }
 }

@@ -113,9 +113,17 @@ class Message extends DTO
         return hash('sha256', json_encode($this->get('reply_markup')));
     }
 
+    public function contact(): ?Contact
+    {
+        $contact = $this->get('contact');
+
+        return $contact ? Contact::fromArray($contact) : null;
+    }
+
     public function signature(): string
     {
         return hash('sha256', json_encode([
+            'contact' => $this->get('contact'),
             'text' => preg_replace('/\s+/', '', strip_tags($this->get('text'))),
             'reply_markup' => $this->get('reply_markup'),
         ]));

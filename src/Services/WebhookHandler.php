@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 use Mollsoft\Telegram\ChatAPI;
 use Mollsoft\Telegram\DTO\CallbackQuery;
 use Mollsoft\Telegram\DTO\Chat;
+use Mollsoft\Telegram\DTO\Contact;
 use Mollsoft\Telegram\DTO\Document;
 use Mollsoft\Telegram\DTO\Message;
 use Mollsoft\Telegram\DTO\PhotoSize;
@@ -210,7 +211,12 @@ class WebhookHandler
             $document = $this->message->document();
         }
 
-        $content = $this->routeLaunch($uri, $text, $this->callbackQuery, 0, $photo, $document);
+        $contact = null;
+        if( $this->message->contact() ) {
+            $contact = $this->message->contact();
+        }
+
+        $content = $this->routeLaunch($uri, $text, $this->callbackQuery, 0, $photo, $document, $contact);
         $this->render($content);
     }
 
@@ -233,6 +239,7 @@ class WebhookHandler
         int $redirects = 0,
         ?PhotoSize $photo = null,
         ?Document $document = null,
+        ?Contact $contact = null,
     ): ?string {
         $request = TelegramRequest::createFromTelegram(
             bot: $this->bot,
@@ -242,6 +249,7 @@ class WebhookHandler
             callbackQuery: $callbackQuery,
             photo: $photo,
             document: $document,
+            contact: $contact
         );
 
         $referer = $this

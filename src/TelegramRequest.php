@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Mollsoft\Telegram;
 
 use Mollsoft\Telegram\DTO\CallbackQuery;
+use Mollsoft\Telegram\DTO\Contact;
 use Mollsoft\Telegram\DTO\Document;
 use Mollsoft\Telegram\DTO\Message\Photo;
 use Mollsoft\Telegram\DTO\PhotoSize;
@@ -23,6 +24,7 @@ class TelegramRequest extends \Illuminate\Http\Request
     protected ?CallbackQuery $callbackQuery = null;
     protected ?PhotoSize $photoSize = null;
     protected ?Document $document = null;
+    protected ?Contact $contact = null;
 
     public static function createFromTelegram(
         TelegramBot $bot,
@@ -32,6 +34,7 @@ class TelegramRequest extends \Illuminate\Http\Request
         ?CallbackQuery $callbackQuery = null,
         ?PhotoSize $photo = null,
         ?Document $document = null,
+        ?Contact $contact = null,
     ): static {
         return static::create(
             uri: $uri,
@@ -43,7 +46,20 @@ class TelegramRequest extends \Illuminate\Http\Request
             ->setText($text)
             ->setCallbackQuery($callbackQuery)
             ->setPhoto($photo)
-            ->setDocument($document);
+            ->setDocument($document)
+            ->setContact($contact);
+    }
+
+    public function setContact(?Contact $contact): static
+    {
+        $this->contact = $contact;
+
+        return $this;
+    }
+
+    public function contact(): ?Contact
+    {
+        return $this->contact;
     }
 
     public function setDocument(?Document $document): static

@@ -265,12 +265,16 @@ readonly class HTMLParser
                 $crawler
                     ->filter('column')
                     ->each(function (Crawler $crawler) use ($rowIndex, $replyKeyboard) {
+                        $button = ReplyKeyboard\Button::make()->setText(
+                            trim(
+                                str_replace("\n", '', $crawler->html())
+                            )
+                        );
+                        if( $crawler->attr('request_contact', 'false') === 'true' ) {
+                            $button->setRequestContact(true);
+                        }
                         $replyKeyboard->button(
-                            ReplyKeyboard\Button::make()->setText(
-                                trim(
-                                    str_replace("\n", '', $crawler->html())
-                                )
-                            ),
+                            $button,
                             $rowIndex
                         );
                     });
