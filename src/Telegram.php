@@ -3,6 +3,7 @@
 namespace Mollsoft\Telegram;
 
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Log;
 use Mollsoft\Telegram\Models\TelegramBot;
 use Mollsoft\Telegram\Models\TelegramChat;
@@ -96,6 +97,10 @@ class Telegram
         }
 
         try {
+            $chat->update([
+                'updated_at' => Date::now(),
+            ]);
+
             $stack = new MessageStack($chat);
             $api = $chat->api();
             $parser = new HTMLParser($html);
