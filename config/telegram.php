@@ -27,6 +27,9 @@ return [
         'delay' => 2, // задержка после обработки запроса
         'max_redirects' => 3, // максимальное количество редиректов
     ],
+    'middleware' => [ // Global Middleware
+
+    ],
     'webhook' => [
         'background' => false,
         // запускать обработчик webhook в фоновом режиме (позволяет не создавать очередь в Telegram, требует proc_open).

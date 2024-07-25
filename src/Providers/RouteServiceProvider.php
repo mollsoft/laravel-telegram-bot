@@ -32,7 +32,7 @@ class RouteServiceProvider extends ServiceProvider
         ]);
 
         if( is_file(base_path('routes/telegram.php')) ) {
-            Route::middleware('telegram')
+            Route::middleware(['telegram', ...config('telegram.middleware', [])])
                 ->name('telegram.')
                 ->group(base_path('routes/telegram.php'));
         }
