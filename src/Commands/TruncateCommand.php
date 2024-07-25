@@ -50,15 +50,20 @@ class TruncateCommand extends Command
                 ->map(fn(Message $item) => $item->id())
                 ->filter(fn($id) => $id !== $mainMessage?->id())
                 ->all();
+            if( count($deleteMessages) ) {
+                $chat->api()->deleteMessages($deleteMessages);
+                $stack->truncate();
 
-            $chat->api()->deleteMessages($deleteMessages);
-            $stack->truncate();
+                if ($mainMessage) {
+                    $stack->push($mainMessage);
+                }
 
-            if ($mainMessage) {
-                $stack->push($mainMessage);
+                $chat->update([
+                    'updated_at' => Date::now()
+                ]);
+
+                return true;
             }
-
-            return true;
         }
 
         return false;
