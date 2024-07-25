@@ -3,7 +3,6 @@
 namespace Mollsoft\Telegram\Commands;
 
 use Illuminate\Console\Command;
-use Mollsoft\Telegram\API;
 use Mollsoft\Telegram\Facades\Telegram;
 use Mollsoft\Telegram\Models\TelegramBot;
 
@@ -15,7 +14,10 @@ class InitCommand extends Command
 
     public function handle(): void
     {
-        $telegramBots = TelegramBot::get();
+        /** @var class-string<TelegramBot> $model */
+        $model = Telegram::botModel();
+
+        $telegramBots = $model::get();
         if ($telegramBots->count() === 0) {
             $this->error('First register the Telegram bot using the command: php artisan telegram:new-bot');
             return;

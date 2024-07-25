@@ -5,6 +5,7 @@ namespace Mollsoft\Telegram\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Mollsoft\Telegram\Facades\Telegram;
 
 class TelegramUser extends Model
 {
@@ -16,7 +17,8 @@ class TelegramUser extends Model
 
     public function chats(): HasMany
     {
-        return $this->hasMany(TelegramChat::class, 'chat_id', 'telegram_chat_id');
+        /** @phpstan-ignore-next-line */
+        return $this->hasMany(Telegram::chatModel(), 'chat_id', 'telegram_chat_id');
     }
 
     public function authenticatable(): MorphTo

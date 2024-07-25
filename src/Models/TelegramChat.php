@@ -5,6 +5,7 @@ namespace Mollsoft\Telegram\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Mollsoft\Telegram\ChatAPI;
+use Mollsoft\Telegram\Facades\Telegram;
 
 class TelegramChat extends Model
 {
@@ -26,7 +27,8 @@ class TelegramChat extends Model
 
     public function bot(): BelongsTo
     {
-        return $this->belongsTo(TelegramBot::class, 'bot_id');
+        /** @phpstan-ignore-next-line */
+        return $this->belongsTo(Telegram::botModel(), 'bot_id');
     }
 
     public function api(): ChatAPI

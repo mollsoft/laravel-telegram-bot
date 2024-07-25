@@ -15,7 +15,10 @@ class UnsetWebhookCommand extends Command
 
     public function handle(): void
     {
-        $telegramBots = TelegramBot::get();
+        /** @var class-string<TelegramBot> $model */
+        $model = Telegram::botModel();
+
+        $telegramBots = $model::get();
         if ($telegramBots->count() === 0) {
             $this->error('First register the Telegram bot using the command: php artisan telegram:new-bot');
             return;

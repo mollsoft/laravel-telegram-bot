@@ -34,5 +34,10 @@ return [
     'cache' => [
         'ttl' => 86400,
         'encode_ttl' => 3 * 24 * 60 * 60,
+    ],
+    'models' => [
+        'bot' => \Mollsoft\Telegram\Models\TelegramBot::class,
+        'chat' => \Mollsoft\Telegram\Models\TelegramChat::class,
+        'user' => \Mollsoft\Telegram\Models\TelegramUser::class,
     ]
 ];

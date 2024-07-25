@@ -6,17 +6,45 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Log;
 use Mollsoft\Telegram\Models\TelegramBot;
 use Mollsoft\Telegram\Models\TelegramChat;
+use Mollsoft\Telegram\Models\TelegramUser;
 use Mollsoft\Telegram\Services\HTMLParser;
 use Mollsoft\Telegram\Services\TelegramRender;
 
 class Telegram
 {
+    /**
+     * @return class-string<TelegramBot>
+     */
+    public function botModel(): string
+    {
+        return config('telegram.models.bot');
+    }
+
+    /**
+     * @return class-string<TelegramBot>
+     */
+    public function chatModel(): string
+    {
+        return config('telegram.models.chat');
+    }
+
+    /**
+     * @return class-string<TelegramUser>
+     */
+    public function userModel(): string
+    {
+        return config('telegram.models.user');
+    }
+
     public function newBot(string $token): TelegramBot
     {
         $api = new API($token);
         $getMe = $api->getMe();
 
-        return TelegramBot::updateOrCreate([
+        /** @var class-string<TelegramBot> $model */
+        $model = $this->botModel();
+
+        return $model::updateOrCreate([
             'token' => $token,
         ], [
             'username' => $getMe->username(),

@@ -7,6 +7,8 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Support\Traits\Macroable;
+use Mollsoft\Telegram\Facades\Telegram;
+use Mollsoft\Telegram\Models\TelegramBot;
 use Mollsoft\Telegram\Models\TelegramUser;
 
 class TelegramGuard implements StatefulGuard
@@ -32,7 +34,10 @@ class TelegramGuard implements StatefulGuard
             return $this->user;
         }
 
-        $this->user = TelegramUser::query()
+        /** @var class-string<TelegramUser> $model */
+        $model = Telegram::userModel();
+
+        $this->user = $model::query()
             ->with('authenticatable')
             ->whereTelegramChatId($this->request->chat()->chat_id)
             ->first()
@@ -70,7 +75,10 @@ class TelegramGuard implements StatefulGuard
 
     public function login(Authenticatable $user, $remember = false): void
     {
-        TelegramUser::updateOrCreate([
+        /** @var class-string<TelegramUser> $model */
+        $model = Telegram::userModel();
+
+        $model::updateOrCreate([
             'telegram_chat_id' => $this->request->chat()->chat_id
         ], [
             'authenticatable_type' => get_class($user),
@@ -103,7 +111,10 @@ class TelegramGuard implements StatefulGuard
 
     public function logout(): void
     {
-        TelegramUser::query()
+        /** @var class-string<TelegramUser> $model */
+        $model = Telegram::userModel();
+
+        $model::query()
             ->whereTelegramChatId($this->request->chat()->chat_id)
             ->delete();
 

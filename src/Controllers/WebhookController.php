@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
+use Mollsoft\Telegram\Facades\Telegram;
 use Mollsoft\Telegram\Models\TelegramBot;
 use Mollsoft\Telegram\Services\WebhookHandler;
 
@@ -28,7 +29,10 @@ class WebhookController
     public function execute(Request $request, string $token, WebhookHandler $handler): Response
     {
         try {
-            $bot = TelegramBot::whereToken($token)->firstOrFail();
+            /** @var class-string<TelegramBot> $model */
+            $model = Telegram::botModel();
+
+            $bot = $model::whereToken($token)->firstOrFail();
 
             $handler->handle($request, $bot);
         } catch (\Exception $e) {

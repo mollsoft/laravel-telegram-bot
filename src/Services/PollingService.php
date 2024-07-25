@@ -17,8 +17,10 @@ class PollingService extends BaseService
 
     protected function init(mixed $botId): static
     {
-        /** @var TelegramBot $botClass */
-        $this->bot = TelegramBot::findOrFail($botId);
+        /** @var class-string<TelegramBot> $model */
+        $model = Telegram::botModel();
+
+        $this->bot = $model::findOrFail($botId);
         $this->api = new API($this->bot->token);
         $this->webhookURL = route('telegram.execute', [
             'token' => $this->bot->token

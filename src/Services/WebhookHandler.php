@@ -20,6 +20,7 @@ use Mollsoft\Telegram\DTO\Message;
 use Mollsoft\Telegram\DTO\PhotoSize;
 use Mollsoft\Telegram\DTO\Update;
 use Mollsoft\Telegram\Enums\ChatAction;
+use Mollsoft\Telegram\Facades\Telegram;
 use Mollsoft\Telegram\Interfaces\HasCaption;
 use Mollsoft\Telegram\MessageStack;
 use Mollsoft\Telegram\Models\TelegramBot;
@@ -113,7 +114,10 @@ class WebhookHandler
             throw new \Exception('Chat not found.');
         }
 
-        $this->chat = TelegramChat::updateOrCreate([
+        /** @var class-string<TelegramChat> $model */
+        $model = Telegram::chatModel();
+
+        $this->chat = $model::updateOrCreate([
             'bot_id' => $this->bot->id,
             'chat_id' => $chat->id(),
         ], [
