@@ -6,6 +6,7 @@ use Mollsoft\Telegram\Commands\InitCommand;
 use Mollsoft\Telegram\Commands\NewBotCommand;
 use Mollsoft\Telegram\Commands\PoolingCommand;
 use Mollsoft\Telegram\Commands\SetWebhookCommand;
+use Mollsoft\Telegram\Commands\TruncateCommand;
 use Mollsoft\Telegram\Commands\UnsetWebhookCommand;
 use Mollsoft\Telegram\Providers\AuthServiceProvider;
 use Mollsoft\Telegram\Providers\RouteServiceProvider;
@@ -41,6 +42,7 @@ class TelegramServiceProvider extends PackageServiceProvider
                 SetWebhookCommand::class,
                 UnsetWebhookCommand::class,
                 PoolingCommand::class,
+                TruncateCommand::class,
             ])
             ->hasInstallCommand(function(InstallCommand $command) {
                 $command

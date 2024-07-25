@@ -39,7 +39,8 @@ return [
         'encode_ttl' => 3 * 24 * 60 * 60,
     ],
     'screen' => [
-        'ttl' => 86400,
+        'ttl' => 86400, // срок жизни сообщения в диалоге
+        'truncate' => 2 * 24 * 60 * 60, // очистка диалога кроме сообщения с reply keyboard через n-секунд после неактивности
     ],
     'models' => [
         'bot' => \Mollsoft\Telegram\Models\TelegramBot::class,

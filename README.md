@@ -73,6 +73,8 @@ You can use Laravel Auth, edit file `config/auth.php` and edit section `guards`:
 
 After this you can use middleware `auth:telegram` in your routes.
 
+If you want work with automatic truncate dialogs, you must run command `php artisan telegram:truncate` every minute using Schedule.
+
 ## Usage / Использование
 
 Create new Telegram Bot:
