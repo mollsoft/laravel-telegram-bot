@@ -211,10 +211,7 @@ class WebhookHandler
             $document = $this->message->document();
         }
 
-        $contact = null;
-        if( $this->message->contact() ) {
-            $contact = $this->message->contact();
-        }
+        $contact = $this->message?->contact();
 
         $content = $this->routeLaunch($uri, $text, $this->callbackQuery, 0, $photo, $document, $contact);
         $this->render($content);
