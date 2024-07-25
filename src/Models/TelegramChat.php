@@ -16,6 +16,7 @@ class TelegramChat extends Model
         'first_name',
         'last_name',
         'chat_data',
+        'updated_at',
     ];
 
     protected function casts(): array
