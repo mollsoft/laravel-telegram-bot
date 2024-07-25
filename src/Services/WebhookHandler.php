@@ -10,6 +10,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Mollsoft\Telegram\ChatAPI;
@@ -126,6 +127,7 @@ class WebhookHandler
             'first_name' => $chat->firstName(),
             'last_name' => $chat->lastName(),
             'chat_data' => $chat->toArray(),
+            'updated_at' => Date::now(),
         ]);
 
         $this->api = new ChatAPI($this->bot->token, $chat->id());
