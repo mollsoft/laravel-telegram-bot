@@ -57,7 +57,11 @@ class TruncateCommand extends Command
                 ->filter(fn(Message $item) => $item->id() === $mainMessage?->id() || abs(Date::now()->diffInSeconds($item->date())) < $this->screenTruncate );
 
             if( $deleteMessages->count() ) {
-                $chat->api()->deleteMessages($deleteMessages->all());
+                try {
+                    $chat->api()->deleteMessages($deleteMessages->all());
+                }
+                catch(\Exception $e) {}
+
                 $stack->truncate();
 
                 foreach( $saveMessages as $message ) {
