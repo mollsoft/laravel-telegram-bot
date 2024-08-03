@@ -13,6 +13,7 @@ use Mollsoft\Telegram\DTO\Message;
 use Mollsoft\Telegram\DTO\Message\Document;
 use Mollsoft\Telegram\DTO\Message\Photo;
 use Mollsoft\Telegram\DTO\Message\Video;
+use Mollsoft\Telegram\DTO\UserProfilePhotos;
 use Mollsoft\Telegram\Enums\ChatAction;
 
 class ChatAPI extends ApiClient
@@ -34,6 +35,17 @@ class ChatAPI extends ApiClient
             'chat_id' => $this->chatId,
             'message_ids' => array_map('intval', $messageIds),
         ])[0];
+    }
+
+    public function getUserProfilePhotos(int $limit = 100, int $offset = 0): UserProfilePhotos
+    {
+        $data = $this->sendRequest('getUserProfilePhotos', [
+            'user_id' => $this->chatId,
+            'offset' => $offset,
+            'limit' => $limit,
+        ]);
+
+        return UserProfilePhotos::fromArray($data);
     }
 
     public function send(Message $message): Message
