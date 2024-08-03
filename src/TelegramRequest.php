@@ -7,8 +7,8 @@ namespace Mollsoft\Telegram;
 use Mollsoft\Telegram\DTO\CallbackQuery;
 use Mollsoft\Telegram\DTO\Contact;
 use Mollsoft\Telegram\DTO\Document;
-use Mollsoft\Telegram\DTO\Message\Photo;
 use Mollsoft\Telegram\DTO\PhotoSize;
+use Mollsoft\Telegram\Models\TelegramAttachment;
 use Mollsoft\Telegram\Models\TelegramBot;
 use Mollsoft\Telegram\Models\TelegramChat;
 use Symfony\Component\HttpFoundation\InputBag;
@@ -25,6 +25,7 @@ class TelegramRequest extends \Illuminate\Http\Request
     protected ?PhotoSize $photoSize = null;
     protected ?Document $document = null;
     protected ?Contact $contact = null;
+    protected ?TelegramAttachment $attachment = null;
 
     public static function createFromTelegram(
         TelegramBot $bot,
@@ -50,6 +51,11 @@ class TelegramRequest extends \Illuminate\Http\Request
             ->setContact($contact);
     }
 
+    public function attachment(): ?TelegramAttachment
+    {
+        return $this->attachment;
+    }
+
     public function setContact(?Contact $contact): static
     {
         $this->contact = $contact;
@@ -64,7 +70,21 @@ class TelegramRequest extends \Illuminate\Http\Request
 
     public function setDocument(?Document $document): static
     {
+        if( $this->document && !$document ) {
+            $this->attachment = null;
+        }
+
         $this->document = $document;
+
+        if( $document ) {
+            $this->attachment = new TelegramAttachment([
+                'bot_id' => $this->bot->id,
+                'chat_id' => $this->chat->chat_id,
+                'type' => 'document',
+                'caption' => $this->text,
+                'data' => $this->document->toArray(),
+            ]);
+        }
 
         return $this;
     }
@@ -76,7 +96,21 @@ class TelegramRequest extends \Illuminate\Http\Request
 
     public function setPhoto(?PhotoSize $photoSize): static
     {
+        if( $this->photoSize && !$photoSize ) {
+            $this->attachment = null;
+        }
+
         $this->photoSize = $photoSize;
+
+        if( $photoSize ) {
+            $this->attachment = new TelegramAttachment([
+                'bot_id' => $this->bot->id,
+                'chat_id' => $this->chat->chat_id,
+                'type' => 'photo',
+                'caption' => $this->text,
+                'data' => $this->photoSize->toArray(),
+            ]);
+        }
 
         return $this;
     }

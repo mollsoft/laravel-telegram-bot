@@ -1,0 +1,36 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up(): void
+    {
+        Schema::create('telegram_attachments', function (Blueprint $table) {
+            $table->id();
+            $table->foreignIdFor(\Mollsoft\Telegram\Models\TelegramBot::class, 'bot_id')
+                ->nullable()
+                ->constrained('telegram_bots')
+                ->nullOnDelete();
+            $table->string('chat_id')
+                ->index();
+            $table->string('type');
+            $table->text('caption')
+                ->nullable();
+            $table->json('data')
+                ->default('[]');
+            $table->string('storage_disk')
+                ->nullable();
+            $table->string('file_path')
+                ->nullable();
+            $table->nullableMorphs('attachmentable');
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('telegram_attachments');
+    }
+};

@@ -5,6 +5,7 @@ namespace Mollsoft\Telegram;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Log;
+use Mollsoft\Telegram\Models\TelegramAttachment;
 use Mollsoft\Telegram\Models\TelegramBot;
 use Mollsoft\Telegram\Models\TelegramChat;
 use Mollsoft\Telegram\Models\TelegramUser;
@@ -35,6 +36,14 @@ class Telegram
     public function userModel(): string
     {
         return config('telegram.models.user');
+    }
+
+    /**
+     * @return class-string<TelegramAttachment>
+     */
+    public function attachmentModel(): string
+    {
+        return config('telegram.models.attachment');
     }
 
     public function newBot(string $token): TelegramBot

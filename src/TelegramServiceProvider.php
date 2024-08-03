@@ -35,6 +35,7 @@ class TelegramServiceProvider extends PackageServiceProvider
                 'create_telegram_bots_table',
                 'create_telegram_chats_table',
                 'create_telegram_users_table',
+                'create_telegram_attachments_table',
             ])
             ->hasCommands([
                 NewBotCommand::class,

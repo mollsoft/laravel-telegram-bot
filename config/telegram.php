@@ -46,5 +46,6 @@ return [
         'bot' => \Mollsoft\Telegram\Models\TelegramBot::class,
         'chat' => \Mollsoft\Telegram\Models\TelegramChat::class,
         'user' => \Mollsoft\Telegram\Models\TelegramUser::class,
+        'attachment' => \Mollsoft\Telegram\Models\TelegramAttachment::class,
     ]
 ];
