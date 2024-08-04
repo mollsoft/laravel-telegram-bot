@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
-use Mollsoft\Telegram\Foundation\TelegramRequest;
+use Mollsoft\Telegram\TelegramRequest;
 
 Route::telegram('/', function(TelegramRequest $request) {
     return '<message><line>You write: '.$request->text().'</line></message>';
