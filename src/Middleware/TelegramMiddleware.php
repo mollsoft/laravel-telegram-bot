@@ -30,6 +30,10 @@ class TelegramMiddleware
         }
 
         if ($request->post('back')) {
+            if( is_callable($callback = config('telegram.callback.back')) ) {
+                call_user_func($callback, $request);
+            }
+
             return redirect()->back();
         }
 
@@ -54,6 +58,9 @@ class TelegramMiddleware
                         return redirect('/');
 
                     case 'back':
+                        if( is_callable($callback = config('telegram.callback.back')) ) {
+                            call_user_func($callback, $request);
+                        }
                         return redirect()->back();
 
                     case 'refresh':
@@ -82,6 +89,10 @@ class TelegramMiddleware
 
         $request->storage()->forget('uri');
         $request->storage()->forget('history');
+
+        if( is_callable($callback = config('telegram.callback.start')) ) {
+            call_user_func($callback, $request);
+        }
 
         return redirect('/');
     }
