@@ -13,8 +13,10 @@ use Mollsoft\Telegram\DTO\Message;
 use Mollsoft\Telegram\DTO\Message\Document;
 use Mollsoft\Telegram\DTO\Message\Photo;
 use Mollsoft\Telegram\DTO\Message\Video;
+use Mollsoft\Telegram\DTO\Message\Voice;
 use Mollsoft\Telegram\DTO\UserProfilePhotos;
 use Mollsoft\Telegram\Enums\ChatAction;
+use Mollsoft\Telegram\Interfaces\HasCaption;
 
 class ChatAPI extends ApiClient
 {
@@ -133,12 +135,12 @@ class ChatAPI extends ApiClient
             }
 
             $responseData['video_src'] = $message->videoSrc();
-        } elseif ($message instanceof Video) {
+        } elseif ($message instanceof Voice) {
             if ($caption = $message->caption()) {
                 $data['caption'] = $caption;
             }
 
-            $src = $message->videoSrc();
+            $src = $message->voiceSrc();
             $hash = null;
             if (File::exists($src)) {
                 $hash = hash_file('sha256', $src);
@@ -147,27 +149,27 @@ class ChatAPI extends ApiClient
             }
 
             try {
-                $responseData = $this->sendRequestMultipart('sendVideo', [
+                $responseData = $this->sendRequestMultipart('sendVoice', [
                     ...$data,
-                    'video' => $src,
+                    'voice' => $src,
                 ]);
             } catch (\Exception) {
-                $src = $message->videoSrc();
+                $src = $message->voiceSrc();
                 if (File::exists($src)) {
                     $src = fopen($src, 'r');
                 }
 
-                $responseData = $this->sendRequestMultipart('sendVideo', [
+                $responseData = $this->sendRequestMultipart('sendVoice', [
                     ...$data,
-                    'video' => $src,
+                    'voice' => $src,
                 ]);
             }
 
-            if ($hash && ($video = $responseData['video'] ?? null)) {
-                Cache::set('telegram_'.$hash, $video['file_id'], (int)config('telegram.cache.ttl', 86400));
+            if ($hash && ($voice = $responseData['voice'] ?? null)) {
+                Cache::set('telegram_'.$hash, $voice['file_id'], (int)config('telegram.cache.ttl', 86400));
             }
 
-            $responseData['video_src'] = $message->videoSrc();
+            $responseData['voice_src'] = $message->voiceSrc();
         } elseif ($message instanceof Document) {
             if ($caption = $message->caption()) {
                 $data['caption'] = $caption;
@@ -247,6 +249,14 @@ class ChatAPI extends ApiClient
         }
 
         if (
+            (($old instanceof Message\Voice) && !($new instanceof Message\Voice))
+            ||
+            (!($old instanceof Message\Voice) && ($new instanceof Message\Voice))
+        ) {
+            return false;
+        }
+
+        if (
             (($old instanceof Document) && !($new instanceof Document))
             ||
             (!($old instanceof Document) && ($new instanceof Document))
@@ -264,7 +274,7 @@ class ChatAPI extends ApiClient
             return true;
         }
 
-        if ($old->caption() && $new->caption()) {
+        if ($old instanceof HasCaption && $new instanceof HasCaption && $old->caption() && $new->caption()) {
             $oldReplyKeyboard = json_encode($old->replyKeyboard()?->toArray() ?? []);
             $newReplyKeyboard = json_encode($new->replyKeyboard()?->toArray() ?? []);
             if ($oldReplyKeyboard !== $newReplyKeyboard) {
@@ -363,6 +373,46 @@ class ChatAPI extends ApiClient
             }
 
             $responseData['video_src'] = $new->videoSrc();
+        } elseif ($old instanceof Message\Voice && $new instanceof Message\Voice) {
+            if ($old->voiceSrc() !== $new->voiceSrc()) {
+                $src = $new->voiceSrc();
+                $hash = null;
+                if (File::exists($src)) {
+                    $hash = hash_file('sha256', $src);
+                    $cacheSrc = Cache::get('telegram_'.$hash);
+                    $src = $cacheSrc ?: fopen($src, 'r');
+                }
+
+                $responseData = $this->sendRequestMultipart('editMessageMedia', [
+                    'chat_id' => $this->chatId,
+                    'message_id' => $old->id(),
+                    'media' => [
+                        'type' => 'audio',
+                        'media' => $src,
+                        'caption' => $new->caption(),
+                        'parse_mode' => 'html',
+                    ],
+                    'reply_markup' => $new->inlineKeyboard()?->toArray() ?? ['inline_keyboard' => []]
+                ]);
+
+                if ($hash && ($voice = $responseData['voice'] ?? null)) {
+                    Cache::set('telegram_'.$hash, $video['file_id'], (int)config('telegram.cache.ttl', 86400));
+                }
+            } elseif (
+                ($old->captionSignature() !== $new->captionSignature())
+                ||
+                ($old->replyMarkupSignature() !== $new->replyMarkupSignature())
+            ) {
+                $responseData = $this->sendRequest('editMessageCaption', [
+                    'chat_id' => $this->chatId,
+                    'message_id' => $old->id(),
+                    'caption' => $new->caption(),
+                    'parse_mode' => 'html',
+                    'reply_markup' => $new->inlineKeyboard()?->toArray() ?? ['inline_keyboard' => []]
+                ]);
+            }
+
+            $responseData['voice_src'] = $new->voiceSrc();
         } elseif ($old instanceof Document && $new instanceof Document) {
             if ($old->documentSrc() !== $new->documentSrc()) {
                 $src = $new->documentSrc();

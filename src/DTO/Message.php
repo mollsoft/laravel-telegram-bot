@@ -8,6 +8,7 @@ use Mollsoft\Telegram\Abstract\DTO;
 use Mollsoft\Telegram\DTO\Message\Document;
 use Mollsoft\Telegram\DTO\Message\Photo;
 use Mollsoft\Telegram\DTO\Message\Video;
+use Mollsoft\Telegram\DTO\Message\Voice;
 use Mollsoft\Telegram\Enums\Direction;
 
 class Message extends DTO
@@ -17,6 +18,7 @@ class Message extends DTO
         'photo' => Photo::class,
         'video' => Video::class,
         'document' => Document::class,
+        'voice' => Voice::class,
     ];
 
     protected function required(): array
@@ -71,6 +73,11 @@ class Message extends DTO
     public function text(): ?string
     {
         return $this->get('text');
+    }
+
+    public function entities(): ?array
+    {
+        return $this->get('entities');
     }
 
     public function setText(?string $text): static
@@ -142,6 +149,9 @@ class Message extends DTO
         }
         if( isset( $attributes['document'] ) || isset($attributes['document_src']) ) {
             $attributes['type'] = 'document';
+        }
+        if( isset($attributes['voice']) || isset($attributes['voice_src']) ) {
+            $attributes['type'] = 'voice';
         }
 
         return new self::$types[$attributes['type']]($attributes, true);

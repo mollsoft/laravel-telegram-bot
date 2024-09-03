@@ -64,7 +64,7 @@ class TelegramMiddleware
                         return redirect()->back();
 
                     case 'refresh':
-                        $request->setText(null);
+                        $request->setMessage(null);
                         break;
                 }
             }

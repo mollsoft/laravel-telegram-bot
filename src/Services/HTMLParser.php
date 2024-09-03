@@ -4,12 +4,15 @@ namespace Mollsoft\Telegram\Services;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Mollsoft\Telegram\DTO\InlineKeyboard;
 use Mollsoft\Telegram\DTO\Message;
 use Mollsoft\Telegram\DTO\Message\Document;
 use Mollsoft\Telegram\DTO\Message\Photo;
 use Mollsoft\Telegram\DTO\Message\Video;
+use Mollsoft\Telegram\DTO\Message\Voice;
 use Mollsoft\Telegram\DTO\ReplyKeyboard;
+use Mollsoft\Telegram\DTO\VoiceNote;
 use Symfony\Component\DomCrawler\Crawler;
 
 
@@ -41,12 +44,13 @@ readonly class HTMLParser
     protected function parseMessages(): static
     {
         $this->crawler
-            ->filter('message, photo, video, document')
+            ->filter('message, photo, video, document, voice')
             ->each(fn(Crawler $item) => match ($item->nodeName()) {
                 'message' => $this->createMessage($item),
                 'photo' => $this->createPhoto($item),
                 'video' => $this->createVideo($item),
                 'document' => $this->createDocument($item),
+                'voice' => $this->createVoice($item),
             });
 
         return $this;
@@ -62,6 +66,10 @@ readonly class HTMLParser
             ->children()
             ->each(function (Crawler $crawler) use (&$lines, $message) {
                 switch ($crawler->nodeName()) {
+                    case 'lines':
+                        $lines[] = $crawler->html();
+                        break;
+
                     case 'line':
                         $lines[] = trim(
                             str_replace("\n", '', $crawler->html())
@@ -113,6 +121,10 @@ readonly class HTMLParser
             ->children()
             ->each(function (Crawler $crawler) use (&$lines, $photo) {
                 switch ($crawler->nodeName()) {
+                    case 'lines':
+                        $lines[] = $crawler->html();
+                        break;
+
                     case 'line':
                         $lines[] = trim(
                             str_replace("\n", '', $crawler->html())
@@ -164,6 +176,10 @@ readonly class HTMLParser
             ->children()
             ->each(function (Crawler $crawler) use (&$lines, $video) {
                 switch ($crawler->nodeName()) {
+                    case 'lines':
+                        $lines[] = $crawler->html();
+                        break;
+
                     case 'line':
                         $lines[] = trim(
                             str_replace("\n", '', $crawler->html())
@@ -201,6 +217,61 @@ readonly class HTMLParser
         return $video;
     }
 
+    protected function createVoice(Crawler $crawler): Voice
+    {
+        $voice = Voice::make();
+
+        if ($src = $crawler->attr('src')) {
+            $voice->setVoiceSrc($src);
+        }
+
+        $lines = [];
+
+        $crawler
+            ->children()
+            ->each(function (Crawler $crawler) use (&$lines, $voice) {
+                switch ($crawler->nodeName()) {
+                    case 'lines':
+                        $lines[] = $crawler->html();
+                        break;
+
+                    case 'line':
+                        $lines[] = trim(
+                            str_replace("\n", '', $crawler->html())
+                        );
+                        break;
+
+                    case 'reply-keyboard':
+                        $voice->setReplyKeyboard(
+                            $this->replyKeyboard($crawler)
+                        );
+                        break;
+
+                    case 'inline-keyboard':
+                        $voice->setInlineKeyboard(
+                            $this->inlineKeyboard($crawler)
+                        );
+                        break;
+                }
+            });
+
+        if (count($lines) > 0) {
+            $linesString = implode("\n", $lines);
+            if ($linesString) {
+                $voice->setCaption($linesString);
+            }
+        }
+
+        $isScreen = $crawler->closest('screen');
+        if ($isScreen) {
+            $this->screenMessages->push($voice);
+        } else {
+            $this->appendMessages->push($voice);
+        }
+
+        return $voice;
+    }
+
     protected function createDocument(Crawler $crawler): Document
     {
         $document = Document::make();
@@ -215,6 +286,10 @@ readonly class HTMLParser
             ->children()
             ->each(function (Crawler $crawler) use (&$lines, $document) {
                 switch ($crawler->nodeName()) {
+                    case 'lines':
+                        $lines[] = $crawler->html();
+                        break;
+
                     case 'line':
                         $lines[] = trim(
                             str_replace("\n", '', $crawler->html())

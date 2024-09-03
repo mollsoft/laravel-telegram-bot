@@ -3,26 +3,29 @@
 namespace Mollsoft\Telegram\DTO\Message;
 
 
+use Illuminate\Support\Collection;
 use Mollsoft\Telegram\DTO\Message;
+use Mollsoft\Telegram\DTO\PhotoSize;
+use Mollsoft\Telegram\DTO\VoiceNote;
 use Mollsoft\Telegram\Interfaces\HasCaption;
 
-class Document extends Message implements HasCaption
+class Voice extends Message implements HasCaption
 {
-    public function document(): ?\Mollsoft\Telegram\DTO\Document
+    public function voiceNote(): ?VoiceNote
     {
-        $value = $this->get('document');
+        $value = $this->get('voice');
 
-        return is_array($value) ? \Mollsoft\Telegram\DTO\Document::fromArray($value) : null;
+        return $value ? VoiceNote::fromArray($value) : null;
     }
 
-    public function documentSrc(): ?string
+    public function voiceSrc(): ?string
     {
-        return $this->get('document_src');
+        return $this->get('voice_src');
     }
 
-    public function setDocumentSrc(string $path): static
+    public function setVoiceSrc(string $path): static
     {
-        $this->attributes['document_src'] = $path;
+        $this->attributes['voice_src'] = $path;
 
         return $this;
     }
@@ -56,7 +59,7 @@ class Document extends Message implements HasCaption
     public function signature(): string
     {
         return hash('sha256', json_encode([
-            'document_src' => $this->get('document_src'),
+            'voice_src' => $this->get('voice_src'),
             'caption' => $this->captionSignature(),
             'reply_markup' => $this->get('reply_markup'),
         ]));

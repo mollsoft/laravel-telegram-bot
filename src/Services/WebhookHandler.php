@@ -195,27 +195,13 @@ class WebhookHandler
         if ($this->message?->text() === '/start' || $this->callbackQuery?->hasData('start')) {
             $uri = '/';
         }
-        $text = $this->message?->text();
-        if( !$text && ($this->message instanceof HasCaption) ) {
-            $text = $this->message->caption();
-        }
 
-        $photo = null;
-        if( $this->message instanceof Message\Photo ) {
-            $photo = $this->message
-                ->photo()
-                ->sortByDesc(fn(PhotoSize $item) => $item->width())
-                ->first();
-        }
-
-        $document = null;
-        if( $this->message instanceof Message\Document ) {
-            $document = $this->message->document();
-        }
-
-        $contact = $this->message?->contact();
-
-        $content = $this->routeLaunch($uri, $text, $this->callbackQuery, 0, $photo, $document, $contact);
+        $content = $this->routeLaunch(
+            uri: $uri,
+            message: $this->message,
+            callbackQuery: $this->callbackQuery,
+            redirects: 0
+        );
         $this->render($content);
     }
 
@@ -233,22 +219,16 @@ class WebhookHandler
 
     protected function routeLaunch(
         string $uri,
-        ?string $text,
-        ?CallbackQuery $callbackQuery,
-        int $redirects = 0,
-        ?PhotoSize $photo = null,
-        ?Document $document = null,
-        ?Contact $contact = null,
+        ?Message $message = null,
+        ?CallbackQuery $callbackQuery = null,
+        int $redirects = 0
     ): ?string {
         $request = TelegramRequest::createFromTelegram(
             bot: $this->bot,
             chat: $this->chat,
             uri: $uri,
-            text: $text,
+            message: $message,
             callbackQuery: $callbackQuery,
-            photo: $photo,
-            document: $document,
-            contact: $contact
         );
 
         $referer = $this
@@ -280,7 +260,13 @@ class WebhookHandler
                 $this->setHistory($history);
             }
             $this->storage->set('uri', $targetUri);
-            return $this->routeLaunch($targetUri, null, null, $redirects + 1);
+
+            return $this->routeLaunch(
+                uri: $targetUri,
+                message: null,
+                callbackQuery: null,
+                redirects: $redirects + 1
+            );
         }
 
         if (!$response->isSuccessful() && view()->exists('telegram::errors.500')) {

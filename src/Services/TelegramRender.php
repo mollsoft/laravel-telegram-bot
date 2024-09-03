@@ -64,8 +64,13 @@ readonly class TelegramRender
                 if ($newMessage === null || abs(Date::now()->diffInSeconds($stackMessage->date())) >= $this->screenTTL) {
                     $deleteMessages[$stackCursor] = $stackMessage->id();
                 } elseif ($newMessage->signature() === $stackMessage->signature()) {
-                    $parserCursor++;
-                    $array[] = $stackMessage;
+                    if( !$stackMessage->from()->isBot() ) {
+                        $deleteMessages[$stackCursor] = $stackMessage->id();
+                    }
+                    else {
+                        $parserCursor++;
+                        $array[] = $stackMessage;
+                    }
                 } elseif (!$this->api->canEdit($stackMessage, $newMessage)) {
                     $deleteMessages[$stackCursor] = $stackMessage->id();
                 } else {

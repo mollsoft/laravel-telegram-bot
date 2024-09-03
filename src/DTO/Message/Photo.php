@@ -37,6 +37,11 @@ class Photo extends Message implements HasCaption
         return $this->get('caption');
     }
 
+    public function captionEntities(): ?array
+    {
+        return $this->get('caption_entities');
+    }
+
     public function setCaption(?string $caption): static
     {
         $this->attributes['caption'] = $caption;
