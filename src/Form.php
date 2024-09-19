@@ -79,6 +79,11 @@ class Form
             $this->current = array_key_first($rules);
         }
 
+        // Если текущего аттрибута нет
+        if( $this->current === null ) {
+            return false;
+        }
+
         // Обнуляем текст ошибки
         $this->error = null;
 
