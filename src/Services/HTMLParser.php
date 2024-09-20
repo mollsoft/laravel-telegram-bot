@@ -390,16 +390,30 @@ readonly class HTMLParser
                             $callbackData = ['encode' => $encodeId,];
                         }
 
-                        $inlineKeyboard->button(
-                            InlineKeyboard\Button::make()
-                                ->setText(
-                                    trim(
-                                        str_replace("\n", '', $crawler->html())
+                        if( $url = $crawler->attr('url') ) {
+                            $inlineKeyboard->button(
+                                InlineKeyboard\Button::make()
+                                    ->setText(
+                                        trim(
+                                            str_replace("\n", '', $crawler->html())
+                                        )
                                     )
-                                )
-                                ->setCallbackData($callbackData),
-                            $rowIndex
-                        );
+                                    ->setUrl($url),
+                                $rowIndex
+                            );
+                        }
+                        else {
+                            $inlineKeyboard->button(
+                                InlineKeyboard\Button::make()
+                                    ->setText(
+                                        trim(
+                                            str_replace("\n", '', $crawler->html())
+                                        )
+                                    )
+                                    ->setCallbackData($callbackData),
+                                $rowIndex
+                            );
+                        }
                     });
             });
 
