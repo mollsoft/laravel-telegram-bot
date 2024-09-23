@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Mollsoft\Telegram;
 
+use danog\TelegramEntities\Entities;
 use Illuminate\Support\Facades\Log;
 use Mollsoft\Telegram\DTO\CallbackQuery;
 use Mollsoft\Telegram\DTO\Contact;
@@ -64,7 +65,12 @@ class TelegramRequest extends \Illuminate\Http\Request
             $entities = $this->message->captionEntities();
         }
 
-        $textWithEntities = $text && $entities ? $this->applyEntities($text, $entities) : (!is_null($text) ? htmlspecialchars($text) : null);
+
+        $textWithEntities = !is_null($text) ? htmlspecialchars($text) : null;
+        if( $text && $entities ) {
+            $telegramEntities = new Entities($text, $entities);
+            $textWithEntities = str_replace("<br>", "\n", $telegramEntities->toHTML());
+        }
 
         $html = $textWithEntities ? '<message><lines>'.$textWithEntities.'</lines></message>' : '';
 
@@ -103,70 +109,6 @@ class TelegramRequest extends \Illuminate\Http\Request
             ->setDocument($document)
             ->setContact($this->message?->contact())
             ->setVoice($voice);
-    }
-
-    protected function applyEntities(string $text, array $entities): string
-    {
-        $typeToTag = [
-            'bold' => 'b',
-            'underline' => 'u',
-            'strikethrough' => 's',
-            'spoiler' => 'tg-spoiler',
-            'code' => 'code',
-            'italic' => 'i',
-            'blockquote' => 'blockquote',
-            'text_link' => 'a',
-        ];
-
-        // Массив для хранения тегов
-        $openTags = [];
-        $closeTags = [];
-
-        // Обрабатываем каждый entity
-        foreach ($entities as $entity) {
-            $start = $entity['offset'];
-            $end = $start + $entity['length'];
-            $type = $entity['type'];
-
-            // Добавляем открывающие теги в нужную позицию
-            if (!isset($openTags[$start])) {
-                $openTags[$start] = '';
-            }
-            if( $typeToTag[$type] ?? null ) {
-                $tag = $typeToTag[$type];
-                if( $tag === 'a' ) {
-                    $tag .= ' href="'.($entity['url'] ?? 'https://t.me').'"';
-                }
-                $openTags[$start] .= '<'.$tag.'>';
-            }
-
-            // Добавляем закрывающие теги в нужную позицию
-            if (!isset($closeTags[$end])) {
-                $closeTags[$end] = '';
-            }
-            if( $typeToTag[$type] ?? null ) {
-                $closeTags[$end] = '</'.$typeToTag[$type].'>' . $closeTags[$end];
-            }
-        }
-
-        // Формируем финальный текст с тегами
-        $result = '';
-        for ($i = 0; $i < mb_strlen($text); $i++) {
-            // Добавляем открывающие теги перед текущим символом, если они есть
-            if (isset($openTags[$i])) {
-                $result .= $openTags[$i];
-            }
-
-            // Добавляем текущий символ
-            $result .= htmlspecialchars(mb_substr($text, $i, 1));
-
-            // Добавляем закрывающие теги после текущего символа, если они есть
-            if (isset($closeTags[$i + 1])) {
-                $result .= $closeTags[$i + 1];
-            }
-        }
-
-        return $result;
     }
 
     public function message(): ?Message
