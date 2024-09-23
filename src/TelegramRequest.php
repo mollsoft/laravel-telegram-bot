@@ -72,7 +72,21 @@ class TelegramRequest extends \Illuminate\Http\Request
             $textWithEntities = str_replace("<br>", "\n", $telegramEntities->toHTML());
         }
 
-        $html = $textWithEntities ? '<message><lines>'.$textWithEntities.'</lines></message>' : '';
+        $inlineKeyboardHTML = '';
+        if( ($inlineKeyboard = $message?->inlineKeyboard()?->toArray()) && count($inlineKeyboard['inline_keyboard'] ?? []) > 0 ) {
+            $inlineKeyboard = $inlineKeyboard['inline_keyboard'];
+            $inlineKeyboardHTML = '<inline-keyboard>';
+            foreach( $inlineKeyboard as $columns ) {
+                $inlineKeyboardHTML .= '<row>';
+                foreach( is_array($columns) ? $columns : [$columns] as $column ) {
+                    $inlineKeyboardHTML .= '<column url="'.($column['url'] ?? config('app.url')).'">'.($column['text'] ?? print_r($column, true)).'</column>';
+                }
+                $inlineKeyboardHTML .= '</row>';
+            }
+            $inlineKeyboardHTML .= '</inline-keyboard>';
+        }
+
+        $html = $textWithEntities ? '<message><lines>'.$textWithEntities.'</lines>'.$inlineKeyboardHTML.'</message>' : '';
 
         $photo = null;
         if( $this->message instanceof Message\Photo ) {
@@ -82,7 +96,7 @@ class TelegramRequest extends \Illuminate\Http\Request
                 ->sortByDesc(fn(PhotoSize $item) => $item->width())
                 ->first();
             if( $photo ) {
-                $html = '<photo src="'.$photo->fileId().'">'.($textWithEntities ? '<lines>'.$textWithEntities.'</lines>' : '').'</photo>';
+                $html = '<photo src="'.$photo->fileId().'">'.($textWithEntities ? '<lines>'.$textWithEntities.'</lines>' : '').$inlineKeyboardHTML.'</photo>';
             }
         }
 
@@ -90,7 +104,7 @@ class TelegramRequest extends \Illuminate\Http\Request
         if( $this->message instanceof Message\Document ) {
             $document = $this->message->document();
             if( $document ) {
-                $html = '<document src="'.$document->fileId().'">'.($textWithEntities ? '<lines>'.$textWithEntities.'</lines>' : '').'</document>';
+                $html = '<document src="'.$document->fileId().'">'.($textWithEntities ? '<lines>'.$textWithEntities.'</lines>' : '').$inlineKeyboardHTML.'</document>';
             }
         }
 
@@ -98,7 +112,7 @@ class TelegramRequest extends \Illuminate\Http\Request
         if( $this->message instanceof Message\Voice ) {
             $voice = $this->message->voiceNote();
             if( $voice ) {
-                $html = '<voice src="'.$voice->fileId().'">'.($textWithEntities ? '<line>'.$textWithEntities.'</line>' : '').'</voice>';
+                $html = '<voice src="'.$voice->fileId().'">'.($textWithEntities ? '<line>'.$textWithEntities.'</line>' : '').$inlineKeyboardHTML.'</voice>';
             }
         }
 
