@@ -91,7 +91,7 @@ class Form
         $this->inputValue = $this->parseInput($this->current, $this->request);
 
         // Устанавливаем в текущий аттрибут значение
-        if ($this->inputValue) {
+        if ($this->inputValue || $this->inputValue === '0') {
             $this->attributes[$this->current] = $this->inputValue === 'NULL' ? '' : $this->inputValue;
         }
 
@@ -99,7 +99,7 @@ class Form
         try {
             $this->attributes = Validator::validate($this->attributes, $rules);
         } catch (ValidationException $e) {
-            if (!$this->inputValue) {
+            if (!$this->inputValue && $this->inputValue !== '0') {
                 return false;
             }
 
