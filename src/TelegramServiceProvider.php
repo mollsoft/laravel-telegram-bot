@@ -8,6 +8,7 @@ use Mollsoft\Telegram\Commands\PoolingCommand;
 use Mollsoft\Telegram\Commands\SetWebhookCommand;
 use Mollsoft\Telegram\Commands\TruncateCommand;
 use Mollsoft\Telegram\Commands\UnsetWebhookCommand;
+use Mollsoft\Telegram\Components\EditForm;
 use Mollsoft\Telegram\Providers\AuthServiceProvider;
 use Mollsoft\Telegram\Providers\RouteServiceProvider;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
@@ -45,6 +46,7 @@ class TelegramServiceProvider extends PackageServiceProvider
                 PoolingCommand::class,
                 TruncateCommand::class,
             ])
+            ->hasViewComponent('telegram-edit-form', EditForm::class)
             ->hasInstallCommand(function(InstallCommand $command) {
                 $command
                     ->publishConfigFile()
