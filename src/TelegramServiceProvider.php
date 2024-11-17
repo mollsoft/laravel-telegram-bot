@@ -46,7 +46,7 @@ class TelegramServiceProvider extends PackageServiceProvider
                 PoolingCommand::class,
                 TruncateCommand::class,
             ])
-            ->hasViewComponent('telegram-edit-form', EditForm::class)
+            ->hasViewComponent('telegram', EditForm::class)
             ->hasInstallCommand(function(InstallCommand $command) {
                 $command
                     ->publishConfigFile()
