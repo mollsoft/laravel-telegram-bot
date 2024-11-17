@@ -147,6 +147,58 @@ If you want make redirect to another page from button, use this template:
 </inline-keyboard>
 ```
 
+### Edit Form / Форма для редактирования данных
+
+```php
+class MyForm extends \Mollsoft\Telegram\EditForm\BaseForm 
+{
+    public function rules(): array
+    {
+        return [
+            'name' => ['required', 'string', 'min:5', 'max:255'],
+            'phone' => ['required', 'string', 'min:10', 'max:15'],
+        ];
+    }
+    
+    public function titles(): array
+    {
+        return [
+            'name' => 'Ваше имя',
+            'phone' => 'Ваш номер телефона'
+        ];
+    }
+}
+```
+
+```php
+class MyController 
+{
+    public function index(MyForm $form): mixed
+    {
+        $form->setDefault([
+            'name' => 'Default name',
+            'phone' => '1234567890',
+        ]);
+        
+        if( $form->validate() ) {
+            // $form->get();
+        }
+        
+        return view('...', compact('form'));
+    }
+}
+```
+
+```html
+<message>
+    <x-telegram-edit-form :form="$form">
+        <x-slot:name>
+            <line>Please, enter your First Name:</line>
+        </x-slot:name>
+    </x-telegram-edit-form>
+</message>
+```
+
 ## Testing / Тестирование
 
 ```bash
