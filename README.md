@@ -173,7 +173,7 @@ class MyForm extends \Mollsoft\Telegram\EditForm\BaseForm
 ```php
 class MyController 
 {
-    public function index(MyForm $form): mixed
+    public function edit(MyForm $form): mixed
     {
         $form->setDefault([
             'name' => 'Default name',
@@ -181,6 +181,15 @@ class MyController
         ]);
         
         if( $form->validate() ) {
+            // $form->get();
+        }
+        
+        return view('...', compact('form'));
+    }
+    
+    public function create(MyForm $form): mixed
+    {
+        if( $form->isCreate()->validate() ) {
             // $form->get();
         }
         

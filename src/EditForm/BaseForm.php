@@ -3,6 +3,7 @@
 namespace Mollsoft\Telegram\EditForm;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Mollsoft\Telegram\Exceptions\RedirectException;
@@ -17,6 +18,7 @@ abstract class BaseForm
     protected ?FormField $previous = null;
     protected ?FormField $next = null;
     protected bool $inputReceived = false;
+    protected bool $isCreate = false;
 
     public function __construct(TelegramRequest $request)
     {
@@ -106,6 +108,13 @@ abstract class BaseForm
         return [];
     }
 
+    public function isCreate(): static
+    {
+        $this->isCreate = true;
+
+        return $this;
+    }
+
     public function setDefault(array $defaults): static
     {
         foreach( $defaults as $name => $value ) {
@@ -173,9 +182,19 @@ abstract class BaseForm
             Validator::validate($formData, $this->rules());
 
             if( $this->inputReceived ) {
-                $this->changeCurrent($this->current->name, [], [
-                    'success_form' => 'Значение принято!'
-                ]);
+                if( $this->isCreate ) {
+                    if( $this->next ) {
+                        $this->changeCurrent($this->next->name);
+                    }
+                    else {
+                        $isSubmit = true;
+                    }
+                }
+                else {
+                    $this->changeCurrent($this->current->name, [], [
+                        'success_form' => 'Значение принято!'
+                    ]);
+                }
             }
         } catch (ValidationException $e) {
             $errors = $e->errors();
@@ -191,7 +210,20 @@ abstract class BaseForm
                 $this->current->error = $errors[$this->current->name][0] ?? null;
 
                 if( !$this->current->error ) {
-                    $this->changeCurrent($this->current->name);
+                    if( $this->isCreate ) {
+                        if( $this->next ) {
+                            $this->changeCurrent($this->next->name);
+                        }
+                        else {
+                            $attribute = array_key_first($errors);
+                            $this->changeCurrent($attribute);
+                        }
+                    }
+                    else {
+                        $this->changeCurrent($this->current->name, [], [
+                            'success_form' => 'Значение принято!'
+                        ]);
+                    }
                 }
             }
 
@@ -208,7 +240,6 @@ abstract class BaseForm
         }
 
         return $isSubmit;
-
     }
 
     public function get(string $key = null, mixed $default = null): mixed
