@@ -34,4 +34,28 @@ class Button extends DTO
 
         return $this;
     }
+
+    public function requestLocation(): bool
+    {
+        return !!$this->get('request_location', false);
+    }
+
+    public function setRequestLocation(bool $requestLocation): static
+    {
+        $this->attributes['request_location'] = $requestLocation;
+
+        return $this;
+    }
+
+    public function webApp(): ?array
+    {
+        return $this->attributes['web_app'] ?? null;
+    }
+
+    public function setWebApp(?array $webApp): static
+    {
+        $this->attributes['web_app'] = $webApp;
+
+        return $this;
+    }
 }

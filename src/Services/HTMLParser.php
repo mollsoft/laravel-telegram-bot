@@ -348,6 +348,12 @@ readonly class HTMLParser
                         if( $crawler->attr('request_contact', 'false') === 'true' ) {
                             $button->setRequestContact(true);
                         }
+                        if( $crawler->attr('request_location', 'false') === 'true' ) {
+                            $button->setRequestLocation(true);
+                        }
+                        if( $webApp = $crawler->attr('web_app', '') ) {
+                            $button->setWebApp(['url' => $webApp]);
+                        }
                         $replyKeyboard->button(
                             $button,
                             $rowIndex
