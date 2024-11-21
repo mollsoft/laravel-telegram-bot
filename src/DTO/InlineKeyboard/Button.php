@@ -46,4 +46,16 @@ class Button extends DTO
 
         return $this;
     }
+
+    public function webApp(): ?array
+    {
+        return $this->attributes['web_app'] ?? null;
+    }
+
+    public function setWebApp(?array $webApp): static
+    {
+        $this->attributes['web_app'] = $webApp;
+
+        return $this;
+    }
 }

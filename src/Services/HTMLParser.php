@@ -345,13 +345,13 @@ readonly class HTMLParser
                                 str_replace("\n", '', $crawler->html())
                             )
                         );
-                        if( $crawler->attr('request_contact', 'false') === 'true' ) {
+                        if ($crawler->attr('request_contact', 'false') === 'true') {
                             $button->setRequestContact(true);
                         }
-                        if( $crawler->attr('request_location', 'false') === 'true' ) {
+                        if ($crawler->attr('request_location', 'false') === 'true') {
                             $button->setRequestLocation(true);
                         }
-                        if( $webApp = $crawler->attr('web_app', '') ) {
+                        if ($webApp = $crawler->attr('web_app', '')) {
                             $button->setWebApp(['url' => $webApp]);
                         }
                         $replyKeyboard->button(
@@ -379,8 +379,7 @@ readonly class HTMLParser
                         foreach ($crawler->getNode(0)->attributes as $attribute) {
                             if (mb_strpos($attribute->nodeName, 'data-') === 0) {
                                 $callbackData[mb_substr($attribute->nodeName, 5)] = $attribute->nodeValue;
-                            }
-                            elseif(mb_strpos($attribute->nodeName, 'query-') === 0) {
+                            } elseif (mb_strpos($attribute->nodeName, 'query-') === 0) {
                                 $callbackData[$attribute->nodeName] = $attribute->nodeValue;
                             }
                         }
@@ -396,7 +395,7 @@ readonly class HTMLParser
                             $callbackData = ['encode' => $encodeId,];
                         }
 
-                        if( $url = $crawler->attr('url') ) {
+                        if ($url = $crawler->attr('url')) {
                             $inlineKeyboard->button(
                                 InlineKeyboard\Button::make()
                                     ->setText(
@@ -407,8 +406,18 @@ readonly class HTMLParser
                                     ->setUrl($url),
                                 $rowIndex
                             );
-                        }
-                        else {
+                        } elseif ($url = $crawler->attr('web_app')) {
+                            $inlineKeyboard->button(
+                                InlineKeyboard\Button::make()
+                                    ->setText(
+                                        trim(
+                                            str_replace("\n", '', $crawler->html())
+                                        )
+                                    )
+                                    ->setWebApp(['url' => $url]),
+                                $rowIndex
+                            );
+                        } else {
                             $inlineKeyboard->button(
                                 InlineKeyboard\Button::make()
                                     ->setText(
