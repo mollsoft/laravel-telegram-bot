@@ -127,6 +127,13 @@ class Message extends DTO
         return $contact ? Contact::fromArray($contact) : null;
     }
 
+    public function webAppData(): ?WebAppData
+    {
+        $webAppData = $this->get('web_app_data');
+
+        return $webAppData ? WebAppData::fromArray($webAppData) : null;
+    }
+
     public function signature(): string
     {
         return hash('sha256', json_encode([
