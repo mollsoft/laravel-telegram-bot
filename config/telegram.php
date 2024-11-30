@@ -3,6 +3,11 @@
 use Mollsoft\Telegram\DTO\BotCommand;
 
 return [
+    'api' => [
+        'base_uri' => 'https://api.telegram.org',
+        'connect_timeout' => 20,
+        'timeout' => 60,
+    ],
     'init' => [
         'default' => [
             // 'name' => 'Название бота',

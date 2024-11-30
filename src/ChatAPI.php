@@ -22,9 +22,11 @@ class ChatAPI extends ApiClient
 {
     public function __construct(string $token, protected readonly int|string $chatId)
     {
-        $client = Http::baseUrl("https://api.telegram.org/bot$token/")
-            ->connectTimeout(20)
-            ->timeout(60);
+        $baseUri = config('telegram.api.base_uri', 'https://api.telegram.org');
+
+        $client = Http::baseUrl("$baseUri/bot$token/")
+            ->connectTimeout(config('telegram.api.connect_timeout', 20))
+            ->timeout(config('telegram.api.timeout', 60));
 
         return parent::__construct($client);
     }

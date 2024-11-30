@@ -19,9 +19,11 @@ class API extends ApiClient
     {
         $this->token = $token;
 
-        $client = Http::baseUrl("https://api.telegram.org/bot$token/")
-            ->connectTimeout(20)
-            ->timeout(60);
+        $baseUri = config('telegram.api.base_uri', 'https://api.telegram.org');
+
+        $client = Http::baseUrl("$baseUri/bot$token/")
+            ->connectTimeout(config('telegram.api.connect_timeout', 20))
+            ->timeout(config('telegram.api.timeout', 60));
 
         return parent::__construct($client);
     }
@@ -136,6 +138,8 @@ class API extends ApiClient
             throw new \Exception(print_r($data, true));
         }
 
-        return 'https://api.telegram.org/file/bot'.$this->token.'/'.$data['file_path'];
+        $baseUri = config('telegram.api.base_uri', 'https://api.telegram.org');
+
+        return $baseUri.'/file/bot'.$this->token.'/'.$data['file_path'];
     }
 }
