@@ -75,6 +75,24 @@ After this you can use middleware `auth:telegram` in your routes.
 
 If you want work with automatic truncate dialogs, you must run command `php artisan telegram:truncate` every minute using Schedule.
 
+Вы можете настроить "живые страницы", для этого в файле `bootstrap/app.php` в раздел `withMiddleware` добавьте aliase:
+```php
+->withMiddleware(function (Middleware $middleware) {
+    $middleware->alias([
+        'telegram.live' => \Mollsoft\Telegram\Middleware\LiveMiddleware::class,
+    ]);
+})
+```
+
+После чего в нужном маршруте подключите middleware:
+```php
+Route::telegram('/', [\App\Telegram\Controllers\MyController::class, 'index'])
+    ->middleware(['telegram.live:30']);
+```
+
+Аргумент - частота в секундах, как часто обновлять страницу.
+
+
 ## Usage / Использование
 
 Create new Telegram Bot:

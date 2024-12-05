@@ -299,13 +299,13 @@ class TelegramRequest extends \Illuminate\Http\Request
         return $this->text;
     }
 
-    public function setLive(int $period, int $timeout): static
+    public function setLive(?int $period = null, int $timeout = 3600): static
     {
-        $this->live = [
+        $this->live = $period ? [
             'period' => $period,
             'timeout' => $timeout,
             'created_at' => Date::now()->getTimestamp()
-        ];
+        ] : null;
 
         return $this;
     }
