@@ -234,6 +234,7 @@ class WebhookHandler
         $referer = $this
             ->getHistory()
             ->first(fn(string $item) => $item !== $uri) ?? '/';
+        $request->headers->set('user-agent', "Telegram Bot @{$this->bot->username}, user ".($this->chat->username ?: $this->chat->chat_id));
         $request->headers->set('referer', $referer.'#back');
 
         $cookies = Cache::get('cookies_'.TelegramChat::class.'_'.$this->chat->id);
