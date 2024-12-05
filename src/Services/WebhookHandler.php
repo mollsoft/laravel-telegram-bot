@@ -205,18 +205,6 @@ class WebhookHandler
         $this->render($content);
     }
 
-    protected function getHistory(): Collection
-    {
-        $history = $this->storage->get('history');
-
-        return collect($history ? json_decode($history, true) : []);
-    }
-
-    protected function setHistory(Collection $history): void
-    {
-        $this->storage->set('history', json_encode($history->all()));
-    }
-
     protected function routeLaunch(
         string $uri,
         ?Message $message = null,
@@ -231,10 +219,13 @@ class WebhookHandler
             callbackQuery: $callbackQuery,
         );
 
-        $referer = $this
-            ->getHistory()
+        $request->headers->set(
+            'user-agent',
+            "Telegram Bot @{$this->bot->username}, user ".($this->chat->username ?: $this->chat->chat_id)
+        );
+
+        $referer = collect($this->chat->visits)
             ->first(fn(string $item) => $item !== $uri) ?? '/';
-        $request->headers->set('user-agent', "Telegram Bot @{$this->bot->username}, user ".($this->chat->username ?: $this->chat->chat_id));
         $request->headers->set('referer', $referer.'#back');
 
         $cookies = Cache::get('cookies_'.TelegramChat::class.'_'.$this->chat->id);
@@ -251,8 +242,14 @@ class WebhookHandler
         $response = Route::dispatch($request);
         event(new RequestHandled($request, $response));
 
+        if ($this->chat->live !== $request->live()) {
+            $this->chat->update([
+                'live' => $request->live(),
+            ]);
+        }
+
         $cookies = [];
-        foreach( $response->headers->getCookies() as $item ) {
+        foreach ($response->headers->getCookies() as $item) {
             $cookies[$item->getName()] = $item->getValue();
         }
         Cache::set('cookies_'.TelegramChat::class.'_'.$this->chat->id, json_encode($cookies), 60 * 60 * 24);
@@ -267,11 +264,12 @@ class WebhookHandler
             if ($isBack) {
                 $targetUri = str_replace("#back", '', $targetUri);
 
-                $history = $this->getHistory();
-                $history = $history
-                    ->skipUntil(fn($item) => $item === $targetUri)
-                    ->skip(1);
-                $this->setHistory($history);
+                $this->chat->update([
+                    'visits' => collect($this->chat->visits)
+                        ->skipUntil(fn($item) => $item === $targetUri)
+                        ->skip(1)
+                        ->all(),
+                ]);
             }
             $this->storage->set('uri', $targetUri);
 
@@ -287,10 +285,14 @@ class WebhookHandler
             return view('telegram::errors.500')->toHtml();
         }
 
-        $history = $this->getHistory();
-        if ($history->first() !== $uri) {
-            $history = $history->prepend($uri)->take(10);
-            $this->setHistory($history);
+        $visits = collect($this->chat->visits);
+        if ($visits->first() !== $uri) {
+            $this->chat->update([
+                'visits' => $visits
+                    ->prepend($uri)
+                    ->take(10)
+                    ->all(),
+            ]);
         }
 
         return $response->getContent();

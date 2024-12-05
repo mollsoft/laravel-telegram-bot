@@ -16,6 +16,9 @@ class TelegramChat extends Model
         'first_name',
         'last_name',
         'chat_data',
+        'visits',
+        'live',
+        'created_at',
         'updated_at',
     ];
 
@@ -23,6 +26,8 @@ class TelegramChat extends Model
     {
         return [
             'chat_data' => 'json',
+            'visits' => 'json',
+            'live' => 'json',
         ];
     }
 

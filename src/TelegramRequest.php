@@ -35,6 +35,7 @@ class TelegramRequest extends \Illuminate\Http\Request
     protected ChatAPI $api;
     protected Storage $storage;
     protected MessageStack $stack;
+    protected ?array $live = null;
 
     public static function createFromTelegram(
         TelegramBot $bot,
@@ -295,5 +296,17 @@ class TelegramRequest extends \Illuminate\Http\Request
     public function text(): ?string
     {
         return $this->text;
+    }
+
+    public function setLive(int $period, int $timeout): static
+    {
+        $this->live = compact('period', 'timeout');
+
+        return $this;
+    }
+
+    public function live(): ?array
+    {
+        return $this->live;
     }
 }

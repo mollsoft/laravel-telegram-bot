@@ -20,7 +20,12 @@ return new class extends Migration {
                 ->nullable();
             $table->string('last_name')
                 ->nullable();
-            $table->json('chat_data');
+            $table->json('chat_data')
+                ->default('[]');
+            $table->json('visits')
+                ->default('[]');
+            $table->json('live')
+                ->nullable();
 
             $table->timestamps();
 
