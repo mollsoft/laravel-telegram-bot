@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Mollsoft\Telegram;
 
 use danog\TelegramEntities\Entities;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Log;
 use Mollsoft\Telegram\DTO\CallbackQuery;
 use Mollsoft\Telegram\DTO\Contact;
@@ -300,7 +301,11 @@ class TelegramRequest extends \Illuminate\Http\Request
 
     public function setLive(int $period, int $timeout): static
     {
-        $this->live = compact('period', 'timeout');
+        $this->live = [
+            'period' => $period,
+            'timeout' => $timeout,
+            'created_at' => Date::now()->getTimestamp()
+        ];
 
         return $this;
     }
