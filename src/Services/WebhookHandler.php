@@ -74,7 +74,7 @@ class WebhookHandler
 
     protected function parseCallbackQuery(): static
     {
-        if( !$this->callbackQuery ) {
+        if (!$this->callbackQuery) {
             return $this;
         }
 
@@ -87,7 +87,7 @@ class WebhookHandler
         }
 
         $allData = $this->callbackQuery->getAllData();
-        if( count($allData) > 0 ) {
+        if (count($allData) > 0) {
             foreach ($allData as $key => $value) {
                 if (mb_strpos($key, 'query-') === 0) {
                     $currentURI = $this->storage->get('uri') ?: '/';
@@ -236,12 +236,25 @@ class WebhookHandler
             ->first(fn(string $item) => $item !== $uri) ?? '/';
         $request->headers->set('referer', $referer.'#back');
 
+        $cookies = Cache::get('cookies_'.TelegramChat::class.'_'.$this->chat->id);
+        if ($cookies && ($cookies = @json_decode($cookies, true))) {
+            foreach ($cookies as $key => $value) {
+                $request->cookies->set($key, $value);
+            }
+        }
+
         App::instance('request', $request);
         App::instance(TelegramRequest::class, $request);
 
         /** @var Response $response */
         $response = Route::dispatch($request);
         event(new RequestHandled($request, $response));
+
+        $cookies = [];
+        foreach( $response->headers->getCookies() as $item ) {
+            $cookies[$item->getName()] = $item->getValue();
+        }
+        Cache::set('cookies_'.TelegramChat::class.'_'.$this->chat->id, json_encode($cookies), 60 * 60 * 24);
 
         if ($response instanceof RedirectResponse) {
             if ($redirects >= $this->pageMaxRedirects) {

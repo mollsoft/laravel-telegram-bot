@@ -6,6 +6,7 @@ namespace Mollsoft\Telegram\Providers;
 
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Routing\Router;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
 use Mollsoft\Telegram\Middleware\TelegramMiddleware;
 
@@ -28,6 +29,7 @@ class RouteServiceProvider extends ServiceProvider
     public function map(): void
     {
         Route::middlewareGroup('telegram', [
+            StartSession::class,
             TelegramMiddleware::class,
         ]);
 
