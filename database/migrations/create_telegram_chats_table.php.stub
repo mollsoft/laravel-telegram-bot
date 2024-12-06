@@ -24,7 +24,11 @@ return new class extends Migration {
                 ->default('[]');
             $table->json('visits')
                 ->default('[]');
-            $table->json('live')
+            $table->unsignedInteger('live_period')
+                ->nullable();
+            $table->timestamp('live_launch_at')
+                ->nullable();
+            $table->timestamp('live_expire_at')
                 ->nullable();
 
             $table->timestamps();

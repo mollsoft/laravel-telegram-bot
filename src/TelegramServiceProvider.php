@@ -3,6 +3,7 @@
 namespace Mollsoft\Telegram;
 
 use Mollsoft\Telegram\Commands\InitCommand;
+use Mollsoft\Telegram\Commands\LiveCommand;
 use Mollsoft\Telegram\Commands\NewBotCommand;
 use Mollsoft\Telegram\Commands\PoolingCommand;
 use Mollsoft\Telegram\Commands\SetWebhookCommand;
@@ -45,6 +46,7 @@ class TelegramServiceProvider extends PackageServiceProvider
                 UnsetWebhookCommand::class,
                 PoolingCommand::class,
                 TruncateCommand::class,
+                LiveCommand::class,
             ])
             ->hasViewComponent('telegram', EditForm::class)
             ->hasInstallCommand(function(InstallCommand $command) {

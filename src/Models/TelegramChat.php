@@ -17,7 +17,9 @@ class TelegramChat extends Model
         'last_name',
         'chat_data',
         'visits',
-        'live',
+        'live_period',
+        'live_launch_at',
+        'live_expire_at',
         'created_at',
         'updated_at',
     ];
@@ -27,7 +29,9 @@ class TelegramChat extends Model
         return [
             'chat_data' => 'json',
             'visits' => 'json',
-            'live' => 'json',
+            'live_period' => 'integer',
+            'live_launch_at' => 'datetime',
+            'live_expire_at' => 'datetime',
         ];
     }
 

@@ -242,13 +242,11 @@ class WebhookHandler
         $response = Route::dispatch($request);
         event(new RequestHandled($request, $response));
 
-        if (
-            ($this->chat->live['period'] ?? null) !== ($request->live()['period'] ?? null)
-            ||
-            ($this->chat->live['timeout'] ?? null) !== ($request->live()['timeout'] ?? null)
-        ) {
+        if( $this->chat->live_expire_at !== $request->liveExpireAt() ) {
             $this->chat->update([
-                'live' => $request->live(),
+                'live_period' => $request->livePeriod(),
+                'live_launch_at' => $request->liveLaunchAt(),
+                'live_expire_at' => $request->liveExpireAt(),
             ]);
         }
 

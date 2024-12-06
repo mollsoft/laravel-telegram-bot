@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Mollsoft\Telegram;
 
 use danog\TelegramEntities\Entities;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Log;
 use Mollsoft\Telegram\DTO\CallbackQuery;
@@ -37,6 +38,9 @@ class TelegramRequest extends \Illuminate\Http\Request
     protected Storage $storage;
     protected MessageStack $stack;
     protected ?array $live = null;
+
+    protected ?int $livePeriod = null;
+    protected ?Carbon $liveLaunchAt = null, $liveExpiredAt = null;
 
     public static function createFromTelegram(
         TelegramBot $bot,
@@ -299,19 +303,27 @@ class TelegramRequest extends \Illuminate\Http\Request
         return $this->text;
     }
 
-    public function setLive(?int $period = null, int $timeout = 3600): static
+    public function live(?int $period = null, int $timeout = 3600): static
     {
-        $this->live = $period ? [
-            'period' => $period,
-            'timeout' => $timeout,
-            'created_at' => Date::now()->getTimestamp()
-        ] : null;
+        $this->livePeriod = $period;
+        $this->liveLaunchAt = $period ? Date::now()->addSeconds($period) : null;
+        $this->liveExpiredAt = $period ? Date::now()->addSeconds($timeout) : null;
 
         return $this;
     }
 
-    public function live(): ?array
+    public function livePeriod(): int
     {
-        return $this->live;
+        return $this->livePeriod;
+    }
+
+    public function liveLaunchAt(): ?Carbon
+    {
+        return $this->liveLaunchAt;
+    }
+
+    public function liveExpireAt(): ?Carbon
+    {
+        return $this->liveExpiredAt;
     }
 }

@@ -12,7 +12,7 @@ class LiveMiddleware
         $period = intval($period);
         $timeout = intval($timeout);
 
-        $request->setLive($period, $timeout);
+        $request->live($period, $timeout);
 
         return $next($request);
     }
