@@ -3,6 +3,7 @@
 namespace Mollsoft\Telegram\Services;
 
 use Illuminate\Support\Facades\Date;
+use Mollsoft\Telegram\Jobs\TelegramLiveJob;
 use Mollsoft\Telegram\Models\TelegramChat;
 
 class LiveRunService
