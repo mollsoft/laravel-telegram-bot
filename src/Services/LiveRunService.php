@@ -2,18 +2,22 @@
 
 namespace Mollsoft\Telegram\Services;
 
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Date;
-use Mollsoft\Telegram\Jobs\TelegramLiveJob;
+use Illuminate\Support\Facades\Process;
 use Mollsoft\Telegram\Models\TelegramChat;
 
 class LiveRunService
 {
     protected ?\Closure $logger = null;
     protected float $startedAt;
+    protected string $liveURL;
 
     public function __construct()
     {
         $this->startedAt = microtime(true);
+
+        $this->liveURL = route('telegram.live');
     }
 
     public function setLogger(\Closure $logger): static
@@ -57,9 +61,13 @@ class LiveRunService
                     'live_launch_at' => Date::now()->addSeconds($chat->live_period),
                 ]);
 
-                TelegramLiveJob::dispatch($chat);
+                $post = http_build_query([
+                    'chat' => Crypt::encrypt($chat->id)
+                ]);
+                $cmd = 'curl -X POST '.$this->liveURL.' -d "'.$post.'" > /dev/null &';
+                Process::run($cmd);
 
-                $this->log('Job successfully dispatched!', 'success');
+                $this->log('CURL process successfully started!', 'success');
             });
 
         $this->log('Finished!');

@@ -4,10 +4,13 @@ namespace Mollsoft\Telegram\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
 use Mollsoft\Telegram\Facades\Telegram;
 use Mollsoft\Telegram\Models\TelegramBot;
+use Mollsoft\Telegram\Models\TelegramChat;
 use Mollsoft\Telegram\Services\WebhookHandler;
 
 class WebhookController
@@ -35,6 +38,25 @@ class WebhookController
             $bot = $model::whereToken($token)->firstOrFail();
 
             $handler->handle($request, $bot);
+        } catch (\Exception $e) {
+            Log::error($e);
+        }
+
+        return response()->noContent();
+    }
+
+    public function live(Request $request, WebhookHandler $handler): Response
+    {
+        try {
+            $chat = $request->post('chat');
+            $chat = Crypt::decrypt($chat);
+
+            /** @var class-string<TelegramChat> $model */
+            $model = Telegram::chatModel();
+
+            $chat = $model::findOrFail($chat);
+
+            $handler->live($chat);
         } catch (\Exception $e) {
             Log::error($e);
         }

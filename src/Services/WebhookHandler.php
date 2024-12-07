@@ -52,16 +52,6 @@ class WebhookHandler
 
     public function handle(Request $request, TelegramBot $bot): void
     {
-        $this
-            ->init($request, $bot)
-            ->setupChat()
-            ->parseCallbackQuery()
-            ->answerCallbackQuery()
-            ->run();
-    }
-
-    protected function init(Request $request, TelegramBot $bot): static
-    {
         $this->bot = $bot;
 
         $postData = $request->post();
@@ -69,7 +59,24 @@ class WebhookHandler
         $this->message = $update->message();
         $this->callbackQuery = $update->callbackQuery();
 
-        return $this;
+        $this
+            ->setupChat()
+            ->parseCallbackQuery()
+            ->answerCallbackQuery()
+            ->run();
+    }
+
+    public function live(TelegramChat $chat): void
+    {
+        $this->chat = $chat;
+        $this->bot = $chat->bot;
+        $this->message = null;
+        $this->callbackQuery = null;
+        $this->api = new ChatAPI($this->bot->token, $chat->chat_id);
+        $this->stack = new MessageStack($this->chat);
+        $this->storage = new Storage(get_class($this->chat).'_'.$this->chat->getKey());
+
+        $this->run();
     }
 
     protected function parseCallbackQuery(): static
@@ -242,7 +249,7 @@ class WebhookHandler
         $response = Route::dispatch($request);
         event(new RequestHandled($request, $response));
 
-        if( $this->chat->live_expire_at !== $request->liveExpireAt() ) {
+        if ($this->chat->live_expire_at !== $request->liveExpireAt()) {
             $this->chat->update([
                 'live_period' => $request->livePeriod(),
                 'live_launch_at' => $request->liveLaunchAt(),

@@ -92,18 +92,6 @@ Route::telegram('/', [\App\Telegram\Controllers\MyController::class, 'index'])
 
 Аргумент - частота в секундах, как часто обновлять страницу.
 
-Так же при использовании Sail нужно в `supervisord.conf` добавить:
-```
-[program:queue-telegram]
-command=/usr/bin/php -d variables_order=EGPCS /var/www/html/artisan queue:listen --queue=telegram
-user=%(ENV_SUPERVISOR_PHP_USER)s
-environment=LARAVEL_SAIL="1",PHP_CLI_SERVER_WORKERS="10"
-stdout_logfile=/dev/stdout
-stdout_logfile_maxbytes=0
-stderr_logfile=/dev/stderr
-stderr_logfile_maxbytes=0
-```
-
 А в файл `routes/console.php` добавить:
 ```php
 Schedule::command('telegram:live')

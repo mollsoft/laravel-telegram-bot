@@ -312,7 +312,7 @@ class TelegramRequest extends \Illuminate\Http\Request
         return $this;
     }
 
-    public function livePeriod(): int
+    public function livePeriod(): ?int
     {
         return $this->livePeriod;
     }
