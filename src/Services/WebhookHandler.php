@@ -41,6 +41,7 @@ class WebhookHandler
     protected ChatAPI $api;
     protected MessageStack $stack;
     protected Storage $storage;
+    protected bool $isLive = false;
 
     public function __construct()
     {
@@ -75,6 +76,7 @@ class WebhookHandler
         $this->api = new ChatAPI($this->bot->token, $chat->chat_id);
         $this->stack = new MessageStack($this->chat);
         $this->storage = new Storage(get_class($this->chat).'_'.$this->chat->getKey());
+        $this->isLive = true;
 
         $this->run();
     }
@@ -249,7 +251,7 @@ class WebhookHandler
         $response = Route::dispatch($request);
         event(new RequestHandled($request, $response));
 
-        if ($this->chat->live_expire_at !== $request->liveExpireAt()) {
+        if (!$this->isLive && $this->chat->live_expire_at !== $request->liveExpireAt()) {
             $this->chat->update([
                 'live_period' => $request->livePeriod(),
                 'live_launch_at' => $request->liveLaunchAt(),
