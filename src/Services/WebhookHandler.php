@@ -292,8 +292,18 @@ class WebhookHandler
             );
         }
 
-        if (!$response->isSuccessful() && view()->exists('telegram::errors.500')) {
-            return view('telegram::errors.500')->toHtml();
+        if( !$response->isSuccessful() ) {
+            if( $this->isLive ) {
+                $this->chat->update([
+                    'live_period' => null,
+                    'live_launch_at' => null,
+                    'live_expire_at' => null,
+                ]);
+            }
+
+            if( view()->exists('telegram::errors.500') ) {
+                return view('telegram::errors.500')->toHtml();
+            }
         }
 
         $visits = collect($this->chat->visits);
