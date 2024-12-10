@@ -7,9 +7,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Mollsoft\Telegram\DTO\Document;
 use Mollsoft\Telegram\DTO\PhotoSize;
+use Mollsoft\Telegram\DTO\VideoFile;
+use Mollsoft\Telegram\DTO\VoiceNote;
 use Mollsoft\Telegram\Facades\Telegram;
 use Mollsoft\Telegram\Interfaces\IsFile;
 
@@ -46,6 +49,12 @@ class TelegramAttachment extends Model
 
             case 'document':
                 return Document::fromArray($this->data);
+
+            case 'video':
+                return VideoFile::fromArray($this->data);
+
+            case 'voice':
+                return VoiceNote::fromArray($this->data);
         }
 
         return null;
