@@ -134,12 +134,17 @@ class API extends ApiClient
             'file_id' => $file->fileId(),
         ]);
 
-        if (!isset($data['file_path'])) {
+        $filePath = $data['file_path'] ?? null;
+        if (!$filePath) {
             throw new \Exception(print_r($data, true));
+        }
+
+        if( mb_substr($filePath, 0, 1) === '/' ) {
+            return $filePath;
         }
 
         $baseUri = config('telegram.api.base_uri', 'https://api.telegram.org');
 
-        return $baseUri.'/file/bot'.$this->token.'/'.$data['file_path'];
+        return $baseUri.'/file/bot'.$this->token.'/'.$filePath;
     }
 }
