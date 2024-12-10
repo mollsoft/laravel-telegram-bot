@@ -90,7 +90,7 @@ class TelegramAttachment extends Model
             }
 
             $extension = pathinfo($downloadLink, PATHINFO_EXTENSION);
-            $fileName = md5_file($downloadLink).'.'.$extension;
+            $fileName = $filePath.'/'.md5_file($downloadLink).'.'.$extension;
 
             rename($downloadLink, Storage::disk($storageDisk)->path($fileName));
         }
