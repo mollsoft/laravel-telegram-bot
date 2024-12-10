@@ -13,6 +13,7 @@ use Mollsoft\Telegram\DTO\Contact;
 use Mollsoft\Telegram\DTO\Document;
 use Mollsoft\Telegram\DTO\Message;
 use Mollsoft\Telegram\DTO\PhotoSize;
+use Mollsoft\Telegram\DTO\VideoFile;
 use Mollsoft\Telegram\DTO\VoiceNote;
 use Mollsoft\Telegram\Interfaces\HasCaption;
 use Mollsoft\Telegram\Models\TelegramAttachment;
@@ -29,6 +30,7 @@ class TelegramRequest extends \Illuminate\Http\Request
     protected ?CallbackQuery $callbackQuery = null;
     protected ?PhotoSize $photoSize = null;
     protected ?Document $document = null;
+    protected ?VideoFile $video = null;
     protected ?Contact $contact = null;
     protected ?VoiceNote $voice = null;
     protected ?TelegramAttachment $attachment = null;
@@ -122,13 +124,22 @@ class TelegramRequest extends \Illuminate\Http\Request
             }
         }
 
+        $video = null;
+        if( $this->message instanceof Message\Video ) {
+            $video = $this->message->video();
+            if( $video ) {
+                $html = '<video src="'.$video->fileId().'">'.($textWithEntities ? '<line>'.$textWithEntities.'</line>' : '').$inlineKeyboardHTML.'</video>';
+            }
+        }
+
         return $this
             ->setMessageHTML($html)
             ->setText($text)
             ->setPhoto($photo)
             ->setDocument($document)
             ->setContact($this->message?->contact())
-            ->setVoice($voice);
+            ->setVoice($voice)
+            ->setVideo($video);
     }
 
     public function message(): ?Message
@@ -163,6 +174,18 @@ class TelegramRequest extends \Illuminate\Http\Request
     public function voice(): ?VoiceNote
     {
         return $this->voice;
+    }
+
+    public function video(): ?VideoFile
+    {
+        return $this->video;
+    }
+
+    public function setVideo(?VideoFile $video): static
+    {
+        $this->video = $video;
+
+        return $this;
     }
 
     public function setDocument(?Document $document): static

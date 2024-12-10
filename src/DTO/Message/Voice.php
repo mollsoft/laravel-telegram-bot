@@ -6,6 +6,7 @@ namespace Mollsoft\Telegram\DTO\Message;
 use Illuminate\Support\Collection;
 use Mollsoft\Telegram\DTO\Message;
 use Mollsoft\Telegram\DTO\PhotoSize;
+use Mollsoft\Telegram\DTO\VideoFile;
 use Mollsoft\Telegram\DTO\VoiceNote;
 use Mollsoft\Telegram\Interfaces\HasCaption;
 
@@ -16,6 +17,13 @@ class Voice extends Message implements HasCaption
         $value = $this->get('voice');
 
         return $value ? VoiceNote::fromArray($value) : null;
+    }
+
+    public function video(): ?VideoFile
+    {
+        $value = $this->get('video');
+
+        return $value ? VideoFile::fromArray($value) : null;
     }
 
     public function voiceSrc(): ?string
