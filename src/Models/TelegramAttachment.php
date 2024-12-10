@@ -84,11 +84,23 @@ class TelegramAttachment extends Model
         }
 
         $downloadLink = $this->bot->api()->getFileLink($file);
-        $fileContent = Http::get($downloadLink)->body();
-        $extension = pathinfo(parse_url($downloadLink, PHP_URL_PATH), PATHINFO_EXTENSION);
-        $fileName = $filePath.'/'.md5($fileContent).'.'.$extension;
+        if( mb_substr($downloadLink, 0, 1) === '/' ) {
+            if( !is_file( $downloadLink ) ) {
+                return false;
+            }
 
-        Storage::disk($storageDisk)->put($fileName, $fileContent);
+            $extension = pathinfo($downloadLink, PATHINFO_EXTENSION);
+            $fileName = md5_file($downloadLink).'.'.$extension;
+
+            rename($downloadLink, Storage::disk($storageDisk)->path($fileName));
+        }
+        else {
+            $fileContent = Http::get($downloadLink)->body();
+            $extension = pathinfo(parse_url($downloadLink, PHP_URL_PATH), PATHINFO_EXTENSION);
+            $fileName = $filePath.'/'.md5($fileContent).'.'.$extension;
+
+            Storage::disk($storageDisk)->put($fileName, $fileContent);
+        }
 
         $this->fill([
             'storage_disk' => $storageDisk,

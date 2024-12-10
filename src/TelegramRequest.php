@@ -183,7 +183,21 @@ class TelegramRequest extends \Illuminate\Http\Request
 
     public function setVideo(?VideoFile $video): static
     {
+        if( $this->video && !$video ) {
+            $this->attachment = null;
+        }
+
         $this->video = $video;
+
+        if( $video ) {
+            $this->attachment = new TelegramAttachment([
+                'bot_id' => $this->bot->id,
+                'chat_id' => $this->chat->chat_id,
+                'type' => 'video',
+                'caption' => $this->text,
+                'data' => $this->video->toArray(),
+            ]);
+        }
 
         return $this;
     }
