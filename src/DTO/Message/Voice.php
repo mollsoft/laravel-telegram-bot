@@ -18,14 +18,7 @@ class Voice extends Message implements HasCaption
 
         return $value ? VoiceNote::fromArray($value) : null;
     }
-
-    public function video(): ?VideoFile
-    {
-        $value = $this->get('video');
-
-        return $value ? VideoFile::fromArray($value) : null;
-    }
-
+    
     public function voiceSrc(): ?string
     {
         return $this->get('voice_src');

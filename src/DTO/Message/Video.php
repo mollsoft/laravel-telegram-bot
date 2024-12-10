@@ -4,10 +4,18 @@ namespace Mollsoft\Telegram\DTO\Message;
 
 
 use Mollsoft\Telegram\DTO\Message;
+use Mollsoft\Telegram\DTO\VideoFile;
 use Mollsoft\Telegram\Interfaces\HasCaption;
 
 class Video extends Message implements HasCaption
 {
+    public function video(): ?VideoFile
+    {
+        $value = $this->get('video');
+
+        return $value ? VideoFile::fromArray($value) : null;
+    }
+
     public function videoSrc(): ?string
     {
         return $this->get('video_src');
