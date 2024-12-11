@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Storage;
 use Mollsoft\Telegram\DTO\Document;
 use Mollsoft\Telegram\DTO\PhotoSize;
 use Mollsoft\Telegram\DTO\VideoFile;
+use Mollsoft\Telegram\DTO\VideoNoteFile;
 use Mollsoft\Telegram\DTO\VoiceNote;
 use Mollsoft\Telegram\Facades\Telegram;
 use Mollsoft\Telegram\Interfaces\IsFile;
@@ -55,6 +56,9 @@ class TelegramAttachment extends Model
 
             case 'voice':
                 return VoiceNote::fromArray($this->data);
+
+            case 'video_note':
+                return VideoNoteFile::fromArray($this->data);
         }
 
         return null;
