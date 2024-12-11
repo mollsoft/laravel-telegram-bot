@@ -205,7 +205,7 @@ class TelegramRequest extends \Illuminate\Http\Request
                 'chat_id' => $this->chat->chat_id,
                 'type' => 'video_note',
                 'caption' => $this->text,
-                'data' => $this->video->toArray(),
+                'data' => $this->videoNote->toArray(),
             ]);
         }
 
