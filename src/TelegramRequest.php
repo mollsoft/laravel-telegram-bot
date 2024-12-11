@@ -14,6 +14,7 @@ use Mollsoft\Telegram\DTO\Document;
 use Mollsoft\Telegram\DTO\Message;
 use Mollsoft\Telegram\DTO\PhotoSize;
 use Mollsoft\Telegram\DTO\VideoFile;
+use Mollsoft\Telegram\DTO\VideoNoteFile;
 use Mollsoft\Telegram\DTO\VoiceNote;
 use Mollsoft\Telegram\Interfaces\HasCaption;
 use Mollsoft\Telegram\Models\TelegramAttachment;
@@ -33,6 +34,7 @@ class TelegramRequest extends \Illuminate\Http\Request
     protected ?VideoFile $video = null;
     protected ?Contact $contact = null;
     protected ?VoiceNote $voice = null;
+    protected ?VideoNoteFile $videoNote = null;
     protected ?TelegramAttachment $attachment = null;
     protected string $messageHTML = '';
 
@@ -72,7 +74,6 @@ class TelegramRequest extends \Illuminate\Http\Request
             $text = $this->message->caption();
             $entities = $this->message->captionEntities();
         }
-
 
         $textWithEntities = !is_null($text) ? htmlspecialchars($text) : null;
         if( $text && $entities ) {
@@ -132,6 +133,14 @@ class TelegramRequest extends \Illuminate\Http\Request
             }
         }
 
+        $videoNote = null;
+        if( $this->message instanceof Message\VideoNote ) {
+            $videoNote = $this->message->videoNote();
+            if( $videoNote ) {
+                $html = '<video-note src="'.$videoNote->fileId().'">'.$inlineKeyboardHTML.'</video-note>';
+            }
+        }
+
         return $this
             ->setMessageHTML($html)
             ->setText($text)
@@ -139,7 +148,8 @@ class TelegramRequest extends \Illuminate\Http\Request
             ->setDocument($document)
             ->setContact($this->message?->contact())
             ->setVoice($voice)
-            ->setVideo($video);
+            ->setVideo($video)
+            ->setVideoNote($videoNote);
     }
 
     public function message(): ?Message
@@ -179,6 +189,32 @@ class TelegramRequest extends \Illuminate\Http\Request
     public function video(): ?VideoFile
     {
         return $this->video;
+    }
+
+    public function setVideoNote(?VideoNoteFile $videoNote): static
+    {
+        if( $this->videoNote && !$videoNote ) {
+            $this->attachment = null;
+        }
+
+        $this->videoNote = $videoNote;
+
+        if( $videoNote ) {
+            $this->attachment = new TelegramAttachment([
+                'bot_id' => $this->bot->id,
+                'chat_id' => $this->chat->chat_id,
+                'type' => 'video_note',
+                'caption' => $this->text,
+                'data' => $this->video->toArray(),
+            ]);
+        }
+
+        return $this;
+    }
+
+    public function videoNote(): ?VideoNoteFile
+    {
+        return $this->videoNote;
     }
 
     public function setVideo(?VideoFile $video): static

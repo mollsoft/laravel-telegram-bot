@@ -172,6 +172,37 @@ class ChatAPI extends ApiClient
             }
 
             $responseData['voice_src'] = $message->voiceSrc();
+        } elseif ($message instanceof Message\VideoNote) {
+            $src = $message->videoNoteSrc();
+            $hash = null;
+            if (File::exists($src)) {
+                $hash = hash_file('sha256', $src);
+                $cacheSrc = Cache::get('telegram_'.$hash);
+                $src = $cacheSrc ?: fopen($src, 'r');
+            }
+
+            try {
+                $responseData = $this->sendRequestMultipart('sendVideoNote', [
+                    ...$data,
+                    'video_note' => $src,
+                ]);
+            } catch (\Exception) {
+                $src = $message->videoNoteSrc();
+                if (File::exists($src)) {
+                    $src = fopen($src, 'r');
+                }
+
+                $responseData = $this->sendRequestMultipart('sendVideoNote', [
+                    ...$data,
+                    'video_note' => $src,
+                ]);
+            }
+
+            if ($hash && ($videoNote = $responseData['video_note'] ?? null)) {
+                Cache::set('telegram_'.$hash, $videoNote['file_id'], (int)config('telegram.cache.ttl', 86400));
+            }
+
+            $responseData['video_note_src'] = $message->videoNoteSrc();
         } elseif ($message instanceof Document) {
             if ($caption = $message->caption()) {
                 $data['caption'] = $caption;

@@ -8,6 +8,7 @@ use Mollsoft\Telegram\Abstract\DTO;
 use Mollsoft\Telegram\DTO\Message\Document;
 use Mollsoft\Telegram\DTO\Message\Photo;
 use Mollsoft\Telegram\DTO\Message\Video;
+use Mollsoft\Telegram\DTO\Message\VideoNote;
 use Mollsoft\Telegram\DTO\Message\Voice;
 use Mollsoft\Telegram\Enums\Direction;
 
@@ -19,6 +20,7 @@ class Message extends DTO
         'video' => Video::class,
         'document' => Document::class,
         'voice' => Voice::class,
+        'video_note' => VideoNote::class,
     ];
 
     protected function required(): array
@@ -159,6 +161,9 @@ class Message extends DTO
         }
         if( isset($attributes['voice']) || isset($attributes['voice_src']) ) {
             $attributes['type'] = 'voice';
+        }
+        if( isset($attributes['video_note']) || isset($attributes['video_note_src']) ) {
+            $attributes['type'] = 'video_note';
         }
 
         return new self::$types[$attributes['type']]($attributes, true);
