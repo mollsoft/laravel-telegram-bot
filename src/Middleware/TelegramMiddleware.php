@@ -3,6 +3,7 @@
 namespace Mollsoft\Telegram\Middleware;
 
 use Closure;
+use Illuminate\Support\Facades\Auth;
 use Mollsoft\Telegram\DTO\Message;
 use Mollsoft\Telegram\TelegramRequest;
 
@@ -17,6 +18,8 @@ class TelegramMiddleware
      */
     public function handle(TelegramRequest $request, Closure $next): mixed
     {
+        Auth::shouldUse('telegram');
+
         if ($redirect = $request->post('redirect')) {
             return redirect($redirect);
         }
