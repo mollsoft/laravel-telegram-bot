@@ -10,6 +10,7 @@ use Mollsoft\Telegram\DTO\Message;
 use Mollsoft\Telegram\DTO\Message\Document;
 use Mollsoft\Telegram\DTO\Message\Photo;
 use Mollsoft\Telegram\DTO\Message\Video;
+use Mollsoft\Telegram\DTO\Message\VideoNote;
 use Mollsoft\Telegram\DTO\Message\Voice;
 use Mollsoft\Telegram\DTO\ReplyKeyboard;
 use Mollsoft\Telegram\DTO\VoiceNote;
@@ -44,13 +45,14 @@ readonly class HTMLParser
     protected function parseMessages(): static
     {
         $this->crawler
-            ->filter('message, photo, video, document, voice')
+            ->filter('message, photo, video, document, voice, video-note')
             ->each(fn(Crawler $item) => match ($item->nodeName()) {
                 'message' => $this->createMessage($item),
                 'photo' => $this->createPhoto($item),
                 'video' => $this->createVideo($item),
                 'document' => $this->createDocument($item),
                 'voice' => $this->createVoice($item),
+                'video-note' => $this->createVideoNote($item),
             });
 
         return $this;
@@ -215,6 +217,42 @@ readonly class HTMLParser
         }
 
         return $video;
+    }
+
+    protected function createVideoNote(Crawler $crawler): VideoNote
+    {
+        $entity = VideoNote::make();
+
+        if ($src = $crawler->attr('src')) {
+            $entity->setVideoNoteSrc($src);
+        }
+
+        $crawler
+            ->children()
+            ->each(function (Crawler $crawler) use (&$lines, $entity) {
+                switch ($crawler->nodeName()) {
+                    case 'reply-keyboard':
+                        $entity->setReplyKeyboard(
+                            $this->replyKeyboard($crawler)
+                        );
+                        break;
+
+                    case 'inline-keyboard':
+                        $entity->setInlineKeyboard(
+                            $this->inlineKeyboard($crawler)
+                        );
+                        break;
+                }
+            });
+
+        $isScreen = $crawler->closest('screen');
+        if ($isScreen) {
+            $this->screenMessages->push($entity);
+        } else {
+            $this->appendMessages->push($entity);
+        }
+
+        return $entity;
     }
 
     protected function createVoice(Crawler $crawler): Voice

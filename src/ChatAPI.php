@@ -6,6 +6,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Mollsoft\Telegram\Abstract\ApiClient;
 use Mollsoft\Telegram\Builder\EditMessageText;
 use Mollsoft\Telegram\Builder\SendMessage;
@@ -13,6 +14,7 @@ use Mollsoft\Telegram\DTO\Message;
 use Mollsoft\Telegram\DTO\Message\Document;
 use Mollsoft\Telegram\DTO\Message\Photo;
 use Mollsoft\Telegram\DTO\Message\Video;
+use Mollsoft\Telegram\DTO\Message\VideoNote;
 use Mollsoft\Telegram\DTO\Message\Voice;
 use Mollsoft\Telegram\DTO\UserProfilePhotos;
 use Mollsoft\Telegram\Enums\ChatAction;
@@ -98,7 +100,11 @@ class ChatAPI extends ApiClient
             }
 
             if ($hash && ($photo = $responseData['photo'] ?? null)) {
-                Cache::set('telegram_'.$hash, $photo[count($photo) - 1]['file_id'], (int)config('telegram.cache.ttl', 86400));
+                Cache::set(
+                    'telegram_'.$hash,
+                    $photo[count($photo) - 1]['file_id'],
+                    (int)config('telegram.cache.ttl', 86400)
+                );
             }
 
             $responseData['photo_src'] = $message->photoSrc();
@@ -137,6 +143,37 @@ class ChatAPI extends ApiClient
             }
 
             $responseData['video_src'] = $message->videoSrc();
+        } elseif ($message instanceof VideoNote) {
+            $src = $message->videoNoteSrc();
+            $hash = null;
+            if (File::exists($src)) {
+                $hash = hash_file('sha256', $src);
+                $cacheSrc = Cache::get('telegram_'.$hash);
+                $src = $cacheSrc ?: fopen($src, 'r');
+            }
+
+            try {
+                $responseData = $this->sendRequestMultipart('sendVideoNote', [
+                    ...$data,
+                    'video_note' => $src,
+                ]);
+            } catch (\Exception) {
+                $src = $message->videoNoteSrc();
+                if (File::exists($src)) {
+                    $src = fopen($src, 'r');
+                }
+
+                $responseData = $this->sendRequestMultipart('sendVideoNote', [
+                    ...$data,
+                    'video_note' => $src,
+                ]);
+            }
+
+            if ($hash && ($videoNote = $responseData['video_note'] ?? null)) {
+                Cache::set('telegram_'.$hash, $videoNote['file_id'], (int)config('telegram.cache.ttl', 86400));
+            }
+
+            $responseData['video_note_src'] = $message->videoNoteSrc();
         } elseif ($message instanceof Voice) {
             if ($caption = $message->caption()) {
                 $data['caption'] = $caption;
@@ -172,37 +209,6 @@ class ChatAPI extends ApiClient
             }
 
             $responseData['voice_src'] = $message->voiceSrc();
-        } elseif ($message instanceof Message\VideoNote) {
-            $src = $message->videoNoteSrc();
-            $hash = null;
-            if (File::exists($src)) {
-                $hash = hash_file('sha256', $src);
-                $cacheSrc = Cache::get('telegram_'.$hash);
-                $src = $cacheSrc ?: fopen($src, 'r');
-            }
-
-            try {
-                $responseData = $this->sendRequestMultipart('sendVideoNote', [
-                    ...$data,
-                    'video_note' => $src,
-                ]);
-            } catch (\Exception) {
-                $src = $message->videoNoteSrc();
-                if (File::exists($src)) {
-                    $src = fopen($src, 'r');
-                }
-
-                $responseData = $this->sendRequestMultipart('sendVideoNote', [
-                    ...$data,
-                    'video_note' => $src,
-                ]);
-            }
-
-            if ($hash && ($videoNote = $responseData['video_note'] ?? null)) {
-                Cache::set('telegram_'.$hash, $videoNote['file_id'], (int)config('telegram.cache.ttl', 86400));
-            }
-
-            $responseData['video_note_src'] = $message->videoNoteSrc();
         } elseif ($message instanceof Document) {
             if ($caption = $message->caption()) {
                 $data['caption'] = $caption;
@@ -349,7 +355,11 @@ class ChatAPI extends ApiClient
                 ]);
 
                 if ($hash && ($photo = $responseData['photo'] ?? null)) {
-                    Cache::set('telegram_'.$hash, $photo[count($photo) - 1]['file_id'], (int)config('telegram.cache.ttl', 86400));
+                    Cache::set(
+                        'telegram_'.$hash,
+                        $photo[count($photo) - 1]['file_id'],
+                        (int)config('telegram.cache.ttl', 86400)
+                    );
                 }
             } elseif (
                 ($old->captionSignature() !== $new->captionSignature())
