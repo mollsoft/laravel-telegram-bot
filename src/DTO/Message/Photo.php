@@ -37,6 +37,19 @@ class Photo extends Message implements HasCaption
         return $this->get('caption');
     }
 
+    public function showCaptionAboveMedia(): ?bool
+    {
+        $value = $this->get('show_caption_above_media');
+        return $value !== null ? (bool)$value : null;
+    }
+
+    public function setShowCaptionAboveMedia(?bool $value): static
+    {
+        $this->attributes['show_caption_above_media'] = $value;
+
+        return $this;
+    }
+
     public function captionEntities(): ?array
     {
         return $this->get('caption_entities');

@@ -110,7 +110,13 @@ class TelegramRequest extends \Illuminate\Http\Request
                 ->sortByDesc(fn(PhotoSize $item) => $item->width())
                 ->first();
             if( $photo ) {
-                $html = '<photo src="'.$photo->fileId().'">'.($textWithEntities ? '<lines>'.$textWithEntities.'</lines>' : '').$inlineKeyboardHTML.'</photo>';
+                $tags = [
+                    'src="'.$photo->fileId().'"',
+                ];
+                if( ($value = $this->message->showCaptionAboveMedia()) !== null ) {
+                    $tags[] = 'show_caption_above_media="'.($value ? 1 : 0).'"';
+                }
+                $html = '<photo '.implode(' ', $tags).'>'.($textWithEntities ? '<lines>'.$textWithEntities.'</lines>' : '').$inlineKeyboardHTML.'</photo>';
             }
         }
 
@@ -134,7 +140,13 @@ class TelegramRequest extends \Illuminate\Http\Request
         if( $this->message instanceof Message\Video ) {
             $video = $this->message->video();
             if( $video ) {
-                $html = '<video src="'.$video->fileId().'">'.($textWithEntities ? '<line>'.$textWithEntities.'</line>' : '').$inlineKeyboardHTML.'</video>';
+                $tags = [
+                    'src="'.$video->fileId().'"',
+                ];
+                if( ($value = $this->message->showCaptionAboveMedia()) !== null ) {
+                    $tags[] = 'show_caption_above_media="'.($value ? 1 : 0).'"';
+                }
+                $html = '<video '.implode(' ', $tags).'>'.($textWithEntities ? '<line>'.$textWithEntities.'</line>' : '').$inlineKeyboardHTML.'</video>';
             }
         }
 

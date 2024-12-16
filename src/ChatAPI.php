@@ -6,10 +6,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Mollsoft\Telegram\Abstract\ApiClient;
-use Mollsoft\Telegram\Builder\EditMessageText;
-use Mollsoft\Telegram\Builder\SendMessage;
 use Mollsoft\Telegram\DTO\Message;
 use Mollsoft\Telegram\DTO\Message\Document;
 use Mollsoft\Telegram\DTO\Message\Photo;
@@ -70,8 +67,11 @@ class ChatAPI extends ApiClient
         }
 
         if ($message instanceof Photo) {
-            if ($caption = $message->caption()) {
-                $data['caption'] = $caption;
+            if ($value = $message->caption()) {
+                $data['caption'] = $value;
+            }
+            if( $value = $message->showCaptionAboveMedia() ) {
+                $data['show_caption_above_media'] = boolval($value);
             }
 
             $src = $message->photoSrc();
@@ -109,8 +109,11 @@ class ChatAPI extends ApiClient
 
             $responseData['photo_src'] = $message->photoSrc();
         } elseif ($message instanceof Video) {
-            if ($caption = $message->caption()) {
-                $data['caption'] = $caption;
+            if ($value = $message->caption()) {
+                $data['caption'] = $value;
+            }
+            if ($value = $message->showCaptionAboveMedia()) {
+                $data['show_caption_above_media'] = boolval($value);
             }
 
             $src = $message->videoSrc();
@@ -342,7 +345,7 @@ class ChatAPI extends ApiClient
                     $src = $cacheSrc ?: fopen($src, 'r');
                 }
 
-                $responseData = $this->sendRequestMultipart('editMessageMedia', [
+                $data = [
                     'chat_id' => $this->chatId,
                     'message_id' => $old->id(),
                     'media' => [
@@ -352,7 +355,12 @@ class ChatAPI extends ApiClient
                         'parse_mode' => 'html',
                     ],
                     'reply_markup' => $new->inlineKeyboard()?->toArray() ?? ['inline_keyboard' => []]
-                ]);
+                ];
+                if ($value = $new->showCaptionAboveMedia()) {
+                    $data['media']['show_caption_above_media'] = boolval($value);
+                }
+
+                $responseData = $this->sendRequestMultipart('editMessageMedia', $data);
 
                 if ($hash && ($photo = $responseData['photo'] ?? null)) {
                     Cache::set(
@@ -386,7 +394,7 @@ class ChatAPI extends ApiClient
                     $src = $cacheSrc ?: fopen($src, 'r');
                 }
 
-                $responseData = $this->sendRequestMultipart('editMessageMedia', [
+                $data = [
                     'chat_id' => $this->chatId,
                     'message_id' => $old->id(),
                     'media' => [
@@ -396,7 +404,11 @@ class ChatAPI extends ApiClient
                         'parse_mode' => 'html',
                     ],
                     'reply_markup' => $new->inlineKeyboard()?->toArray() ?? ['inline_keyboard' => []]
-                ]);
+                ];
+                if ($value = $new->showCaptionAboveMedia()) {
+                    $data['media']['show_caption_above_media'] = boolval($value);
+                }
+                $responseData = $this->sendRequestMultipart('editMessageMedia', $data);
 
                 if ($hash && ($video = $responseData['video'] ?? null)) {
                     Cache::set('telegram_'.$hash, $video['file_id'], (int)config('telegram.cache.ttl', 86400));
@@ -406,13 +418,17 @@ class ChatAPI extends ApiClient
                 ||
                 ($old->replyMarkupSignature() !== $new->replyMarkupSignature())
             ) {
-                $responseData = $this->sendRequest('editMessageCaption', [
+                $data = [
                     'chat_id' => $this->chatId,
                     'message_id' => $old->id(),
                     'caption' => $new->caption(),
                     'parse_mode' => 'html',
                     'reply_markup' => $new->inlineKeyboard()?->toArray() ?? ['inline_keyboard' => []]
-                ]);
+                ];
+                if ($value = $new->showCaptionAboveMedia()) {
+                    $data['show_caption_above_media'] = boolval($value);
+                }
+                $responseData = $this->sendRequest('editMessageCaption', $data);
             }
 
             $responseData['video_src'] = $new->videoSrc();
@@ -439,7 +455,7 @@ class ChatAPI extends ApiClient
                 ]);
 
                 if ($hash && ($voice = $responseData['voice'] ?? null)) {
-                    Cache::set('telegram_'.$hash, $video['file_id'], (int)config('telegram.cache.ttl', 86400));
+                    Cache::set('telegram_'.$hash, $voice['file_id'], (int)config('telegram.cache.ttl', 86400));
                 }
             } elseif (
                 ($old->captionSignature() !== $new->captionSignature())
@@ -470,7 +486,7 @@ class ChatAPI extends ApiClient
                     'chat_id' => $this->chatId,
                     'message_id' => $old->id(),
                     'media' => [
-                        'type' => 'video',
+                        'type' => 'document',
                         'media' => $src,
                         'caption' => $new->caption(),
                         'parse_mode' => 'html',

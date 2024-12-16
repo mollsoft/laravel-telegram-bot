@@ -117,6 +117,12 @@ readonly class HTMLParser
             $photo->setPhotoSrc($src);
         }
 
+        if( $show_caption_above_media = $crawler->attr('show_caption_above_media') ) {
+            $photo->setShowCaptionAboveMedia(
+                boolval($show_caption_above_media)
+            );
+        }
+
         $lines = [];
 
         $crawler
@@ -170,6 +176,12 @@ readonly class HTMLParser
 
         if ($src = $crawler->attr('src')) {
             $video->setVideoSrc($src);
+        }
+
+        if( $show_caption_above_media = $crawler->attr('show_caption_above_media') ) {
+            $video->setShowCaptionAboveMedia(
+                boolval($show_caption_above_media)
+            );
         }
 
         $lines = [];
