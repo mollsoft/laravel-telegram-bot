@@ -301,7 +301,9 @@ class WebhookHandler
                 ]);
             }
 
-            if( view()->exists('telegram::errors.500') ) {
+            if( view()->exists('telegram::errors.'.$response->status()) ) {
+                return view('telegram::errors.'.$response->status())->toHtml();
+            } elseif( view()->exists('telegram::errors.500') ) {
                 return view('telegram::errors.500')->toHtml();
             }
         }
