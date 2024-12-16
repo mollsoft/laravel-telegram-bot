@@ -83,7 +83,7 @@ class TelegramRequest extends \Illuminate\Http\Request
                 }
             }
             $telegramEntities = new Entities($text, $entities);
-            $textWithEntities = str_replace("<br>", "\n", $telegramEntities->toHTML());
+            $textWithEntities = str_replace("<br>", "\n", $telegramEntities->toHTML(true));
         }
 
         $inlineKeyboardHTML = '';
