@@ -193,7 +193,21 @@ class TelegramRequest extends \Illuminate\Http\Request
 
     public function setVoice(?VoiceNote $voice): static
     {
+        if( $this->voice && !$voice ) {
+            $this->attachment = null;
+        }
+
         $this->voice = $voice;
+
+        if( $voice ) {
+            $this->attachment = new TelegramAttachment([
+                'bot_id' => $this->bot->id,
+                'chat_id' => $this->chat->chat_id,
+                'type' => 'voice',
+                'caption' => $this->text,
+                'data' => $this->voice->toArray(),
+            ]);
+        }
 
         return $this;
     }
