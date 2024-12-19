@@ -170,14 +170,14 @@ class WebhookHandler
         } catch (\Exception $exception) {
             Log::error($exception);
 
-            if ($this->message) {
-                $this->api->try('deleteMessages', $this->message->id());
-            }
-
             $isLockTimeout = $exception instanceof LockTimeoutException;
             if (!$isLockTimeout && view()->exists('telegram::errors.500')) {
                 $html = view('telegram::errors.500', compact('exception'))->toHtml();
                 $this->render($html);
+            }
+
+            if ($this->message) {
+                $this->api->try('deleteMessages', $this->message->id());
             }
         }
 
@@ -233,8 +233,7 @@ class WebhookHandler
             "Telegram Bot @{$this->bot->username}, user ".($this->chat->username ?: $this->chat->chat_id)
         );
 
-        $referer = collect($this->chat->visits)
-            ->first(fn(string $item) => $item !== $uri) ?? '/';
+        $referer = $this->chat->visits->first(fn(string $item) => $item !== $uri) ?? '/';
         $request->headers->set('referer', $referer.'#back');
 
         $cookies = Cache::get('cookies_'.TelegramChat::class.'_'.$this->chat->id);
@@ -275,10 +274,9 @@ class WebhookHandler
             if ($isBack) {
                 $targetUri = str_replace("#back", '', $targetUri);
 
-                $this->chat->visits = collect($this->chat->visits)
+                $this->chat->visits = $this->chat->visits
                     ->skipUntil(fn($item) => $item === $targetUri)
-                    ->skip(1)
-                    ->all();
+                    ->skip(1);
                 $this->chat->save();
             }
             $this->storage->set('uri', $targetUri);
@@ -307,12 +305,10 @@ class WebhookHandler
             }
         }
 
-        $visits = collect($this->chat->visits);
-        if ($visits->first() !== $uri) {
-            $this->chat->visits = $visits
+        if( $this->chat->visits->first() !== $uri ) {
+            $this->chat->visits = $this->chat->visits
                 ->prepend($uri)
-                ->take(10)
-                ->all();
+                ->take(10);
             $this->chat->save();
         }
 

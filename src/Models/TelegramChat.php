@@ -28,7 +28,7 @@ class TelegramChat extends Model
     {
         return [
             'chat_data' => 'json',
-            'visits' => 'json',
+            'visits' => 'collection',
             'live_period' => 'integer',
             'live_launch_at' => 'datetime',
             'live_expire_at' => 'datetime',
