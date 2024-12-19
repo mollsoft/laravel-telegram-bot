@@ -233,6 +233,10 @@ class WebhookHandler
             "Telegram Bot @{$this->bot->username}, user ".($this->chat->username ?: $this->chat->chat_id)
         );
 
+        if( !$this->chat->visits ) {
+            $this->chat->visits = collect();
+        }
+
         $referer = $this->chat->visits->first(fn(string $item) => $item !== $uri) ?? '/';
         $request->headers->set('referer', $referer.'#back');
 
