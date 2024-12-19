@@ -275,12 +275,11 @@ class WebhookHandler
             if ($isBack) {
                 $targetUri = str_replace("#back", '', $targetUri);
 
-                $this->chat->update([
-                    'visits' => collect($this->chat->visits)
-                        ->skipUntil(fn($item) => $item === $targetUri)
-                        ->skip(1)
-                        ->all(),
-                ]);
+                $this->chat->visits = collect($this->chat->visits)
+                    ->skipUntil(fn($item) => $item === $targetUri)
+                    ->skip(1)
+                    ->all();
+                $this->chat->save();
             }
             $this->storage->set('uri', $targetUri);
 
@@ -310,12 +309,11 @@ class WebhookHandler
 
         $visits = collect($this->chat->visits);
         if ($visits->first() !== $uri) {
-            $this->chat->update([
-                'visits' => $visits
-                    ->prepend($uri)
-                    ->take(10)
-                    ->all(),
-            ]);
+            $this->chat->visits = $visits
+                ->prepend($uri)
+                ->take(10)
+                ->all();
+            $this->chat->save();
         }
 
         return $response->getContent();
