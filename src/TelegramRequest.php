@@ -53,10 +53,26 @@ class TelegramRequest extends \Illuminate\Http\Request
         ?Message $message = null,
         ?CallbackQuery $callbackQuery = null,
     ): static {
+        $appURL = config('app.url');
+        $appHost = parse_url($appURL, PHP_URL_HOST);
+        $appScheme = parse_url($appURL, PHP_URL_SCHEME);
+
+        $server = [
+            'SERVER_NAME' => $appHost,
+            'HTTP_HOST' => $appHost,
+            'SERVER_PORT' => $appScheme === 'https' ? 443 : 80,
+        ];
+        if ($appScheme === 'https') {
+            $server['HTTPS'] = 'on';
+        }
+
         return static::create(
             uri: $uri,
             method: 'TELEGRAM',
-            parameters: $parameters ?? []
+            parameters: $parameters ?? [],
+            cookies: [],
+            files: [],
+            server: $server
         )
             ->setBot($bot)
             ->setChat($chat)
@@ -70,15 +86,15 @@ class TelegramRequest extends \Illuminate\Http\Request
 
         $text = $this->message?->text();
         $entities = $this->message?->entities();
-        if( !$text && ($this->message instanceof HasCaption) ) {
+        if (!$text && ($this->message instanceof HasCaption)) {
             $text = $this->message->caption();
             $entities = $this->message->captionEntities();
         }
 
         $textWithEntities = !is_null($text) ? htmlspecialchars($text) : null;
-        if( $text && $entities ) {
-            foreach( $entities as $i => $item ) {
-                if( ($item['type'] ?? null) === 'blockquote' ) {
+        if ($text && $entities) {
+            foreach ($entities as $i => $item) {
+                if (($item['type'] ?? null) === 'blockquote') {
                     $entities[$i]['type'] = 'block_quote';
                 }
             }
@@ -87,13 +103,17 @@ class TelegramRequest extends \Illuminate\Http\Request
         }
 
         $inlineKeyboardHTML = '';
-        if( ($inlineKeyboard = $message?->inlineKeyboard()?->toArray()) && count($inlineKeyboard['inline_keyboard'] ?? []) > 0 ) {
+        if (($inlineKeyboard = $message?->inlineKeyboard()?->toArray()) && count(
+                $inlineKeyboard['inline_keyboard'] ?? []
+            ) > 0) {
             $inlineKeyboard = $inlineKeyboard['inline_keyboard'];
             $inlineKeyboardHTML = '<inline-keyboard>';
-            foreach( $inlineKeyboard as $columns ) {
+            foreach ($inlineKeyboard as $columns) {
                 $inlineKeyboardHTML .= '<row>';
-                foreach( is_array($columns) ? $columns : [$columns] as $column ) {
-                    $inlineKeyboardHTML .= '<column url="'.($column['url'] ?? config('app.url')).'">'.($column['text'] ?? print_r($column, true)).'</column>';
+                foreach (is_array($columns) ? $columns : [$columns] as $column) {
+                    $inlineKeyboardHTML .= '<column url="'.($column['url'] ?? config(
+                            'app.url'
+                        )).'">'.($column['text'] ?? print_r($column, true)).'</column>';
                 }
                 $inlineKeyboardHTML .= '</row>';
             }
@@ -103,57 +123,65 @@ class TelegramRequest extends \Illuminate\Http\Request
         $html = $textWithEntities ? '<message><lines>'.$textWithEntities.'</lines>'.$inlineKeyboardHTML.'</message>' : '';
 
         $photo = null;
-        if( $this->message instanceof Message\Photo ) {
+        if ($this->message instanceof Message\Photo) {
             /** @var ?PhotoSize $photo */
             $photo = $this->message
                 ->photo()
                 ->sortByDesc(fn(PhotoSize $item) => $item->width())
                 ->first();
-            if( $photo ) {
+            if ($photo) {
                 $tags = [
                     'src="'.$photo->fileId().'"',
                 ];
-                if( ($value = $this->message->showCaptionAboveMedia()) !== null ) {
+                if (($value = $this->message->showCaptionAboveMedia()) !== null) {
                     $tags[] = 'show_caption_above_media="'.($value ? 1 : 0).'"';
                 }
-                $html = '<photo '.implode(' ', $tags).'>'.($textWithEntities ? '<lines>'.$textWithEntities.'</lines>' : '').$inlineKeyboardHTML.'</photo>';
+                $html = '<photo '.implode(
+                        ' ',
+                        $tags
+                    ).'>'.($textWithEntities ? '<lines>'.$textWithEntities.'</lines>' : '').$inlineKeyboardHTML.'</photo>';
             }
         }
 
         $document = null;
-        if( $this->message instanceof Message\Document ) {
+        if ($this->message instanceof Message\Document) {
             $document = $this->message->document();
-            if( $document ) {
-                $html = '<document src="'.$document->fileId().'">'.($textWithEntities ? '<lines>'.$textWithEntities.'</lines>' : '').$inlineKeyboardHTML.'</document>';
+            if ($document) {
+                $html = '<document src="'.$document->fileId(
+                    ).'">'.($textWithEntities ? '<lines>'.$textWithEntities.'</lines>' : '').$inlineKeyboardHTML.'</document>';
             }
         }
 
         $voice = null;
-        if( $this->message instanceof Message\Voice ) {
+        if ($this->message instanceof Message\Voice) {
             $voice = $this->message->voiceNote();
-            if( $voice ) {
-                $html = '<voice src="'.$voice->fileId().'">'.($textWithEntities ? '<line>'.$textWithEntities.'</line>' : '').$inlineKeyboardHTML.'</voice>';
+            if ($voice) {
+                $html = '<voice src="'.$voice->fileId(
+                    ).'">'.($textWithEntities ? '<line>'.$textWithEntities.'</line>' : '').$inlineKeyboardHTML.'</voice>';
             }
         }
 
         $video = null;
-        if( $this->message instanceof Message\Video ) {
+        if ($this->message instanceof Message\Video) {
             $video = $this->message->video();
-            if( $video ) {
+            if ($video) {
                 $tags = [
                     'src="'.$video->fileId().'"',
                 ];
-                if( ($value = $this->message->showCaptionAboveMedia()) !== null ) {
+                if (($value = $this->message->showCaptionAboveMedia()) !== null) {
                     $tags[] = 'show_caption_above_media="'.($value ? 1 : 0).'"';
                 }
-                $html = '<video '.implode(' ', $tags).'>'.($textWithEntities ? '<line>'.$textWithEntities.'</line>' : '').$inlineKeyboardHTML.'</video>';
+                $html = '<video '.implode(
+                        ' ',
+                        $tags
+                    ).'>'.($textWithEntities ? '<line>'.$textWithEntities.'</line>' : '').$inlineKeyboardHTML.'</video>';
             }
         }
 
         $videoNote = null;
-        if( $this->message instanceof Message\VideoNote ) {
+        if ($this->message instanceof Message\VideoNote) {
             $videoNote = $this->message->videoNote();
-            if( $videoNote ) {
+            if ($videoNote) {
                 $html = '<video-note src="'.$videoNote->fileId().'">'.$inlineKeyboardHTML.'</video-note>';
             }
         }
@@ -193,13 +221,13 @@ class TelegramRequest extends \Illuminate\Http\Request
 
     public function setVoice(?VoiceNote $voice): static
     {
-        if( $this->voice && !$voice ) {
+        if ($this->voice && !$voice) {
             $this->attachment = null;
         }
 
         $this->voice = $voice;
 
-        if( $voice ) {
+        if ($voice) {
             $this->attachment = new TelegramAttachment([
                 'bot_id' => $this->bot->id,
                 'chat_id' => $this->chat->chat_id,
@@ -224,13 +252,13 @@ class TelegramRequest extends \Illuminate\Http\Request
 
     public function setVideoNote(?VideoNoteFile $videoNote): static
     {
-        if( $this->videoNote && !$videoNote ) {
+        if ($this->videoNote && !$videoNote) {
             $this->attachment = null;
         }
 
         $this->videoNote = $videoNote;
 
-        if( $videoNote ) {
+        if ($videoNote) {
             $this->attachment = new TelegramAttachment([
                 'bot_id' => $this->bot->id,
                 'chat_id' => $this->chat->chat_id,
@@ -250,13 +278,13 @@ class TelegramRequest extends \Illuminate\Http\Request
 
     public function setVideo(?VideoFile $video): static
     {
-        if( $this->video && !$video ) {
+        if ($this->video && !$video) {
             $this->attachment = null;
         }
 
         $this->video = $video;
 
-        if( $video ) {
+        if ($video) {
             $this->attachment = new TelegramAttachment([
                 'bot_id' => $this->bot->id,
                 'chat_id' => $this->chat->chat_id,
@@ -271,13 +299,13 @@ class TelegramRequest extends \Illuminate\Http\Request
 
     public function setDocument(?Document $document): static
     {
-        if( $this->document && !$document ) {
+        if ($this->document && !$document) {
             $this->attachment = null;
         }
 
         $this->document = $document;
 
-        if( $document ) {
+        if ($document) {
             $this->attachment = new TelegramAttachment([
                 'bot_id' => $this->bot->id,
                 'chat_id' => $this->chat->chat_id,
@@ -297,13 +325,13 @@ class TelegramRequest extends \Illuminate\Http\Request
 
     public function setPhoto(?PhotoSize $photoSize): static
     {
-        if( $this->photoSize && !$photoSize ) {
+        if ($this->photoSize && !$photoSize) {
             $this->attachment = null;
         }
 
         $this->photoSize = $photoSize;
 
-        if( $photoSize ) {
+        if ($photoSize) {
             $this->attachment = new TelegramAttachment([
                 'bot_id' => $this->bot->id,
                 'chat_id' => $this->chat->chat_id,
