@@ -12,6 +12,7 @@ use Mollsoft\Telegram\TelegramRequest;
 abstract class BaseForm
 {
     protected readonly TelegramRequest $request;
+    protected array $query;
     /** @var Collection<FormField> $fields */
     protected Collection $fields;
     protected ?FormField $current = null;
@@ -20,9 +21,11 @@ abstract class BaseForm
     protected bool $inputReceived = false;
     protected bool $isCreate = false;
 
+
     public function __construct(TelegramRequest $request)
     {
         $this->request = $request;
+        $this->query = $request->query();
 
         $this->init();
     }
@@ -42,13 +45,13 @@ abstract class BaseForm
                     title: $titles[$name] ?? $name,
                     optional: in_array($name, $optional),
                     default: $defaults[$name] ?? null,
-                    value: $this->request->query($name),
+                    value: $this->query[$name] ?? null,
                     error: null
                 )
             );
         }
 
-        $currentName = $this->request->query('_current');
+        $currentName = $this->query['_current'] ?? null;
         if( $currentName ) {
             $this->currentByName($currentName);
         }
@@ -176,6 +179,9 @@ abstract class BaseForm
             $value = $inputData === 'NULL' || $inputData === '/empty' ? '' : $inputData;
             $this->current->value = $value;
             $formData[$this->current->name] = $value;
+
+            $this->query[$this->current->name] = $value;
+            $this->init();
         }
 
         try {
@@ -251,7 +257,7 @@ abstract class BaseForm
                 ->all();
         }
 
-        return $this->fields->firstWhere('name', $key)?->value ?? $default;
+        return $this->fields->firstWhere('name', $key)?->value ?? ($this->query[$key] ?? $default);
     }
 
     public function all(): array

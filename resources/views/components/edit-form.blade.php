@@ -7,7 +7,7 @@
     @foreach($form->fields() as $i => $field)
         <line>{{ $form->current()->name === $field->name ? '→ ' : '' }}{{ $field->error ? '🔴' : ($field->value !== null ? '✅' : ($field->default !== null ? '🟢' : '⚪')) }} <i>{{ $field->title }}:</i> <code>{{ $form->get($field->name, $field->default) === '' || $form->get($field->name, $field->default) === null ? '-' : $form->get($field->name, $field->default) }}</code></line>
     @endforeach
-    <line></line>
+    {{ $footer ?? '' }}
     <inline-keyboard>
         <row>
             <column data-current="{{ $form->previous()?->name }}">👈 Назад</column>
@@ -30,6 +30,11 @@
         <line>✅ <code>{!! session('success_form') !!}</code></line>
     </message>
 @elseif( $form->current() )
+    @if( $form->current()->error && $form->inputReceived() )
+        <message>
+            <line>❌ Ошибка: <code>{{ $form->current()->error }}</code></line>
+        </message>
+    @endif
     <message>
         @if( ${$form->current()->name} ?? null )
             {{ ${$form->current()->name} }}
