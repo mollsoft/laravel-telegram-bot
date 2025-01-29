@@ -31,6 +31,6 @@ class TelegramBot extends Model
     public function chats(): HasMany
     {
         /** @phpstan-ignore-next-line */
-        return $this->hasMany(Telegram::chatModel());
+        return $this->hasMany(Telegram::chatModel(), 'bot_id');
     }
 }
