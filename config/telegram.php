@@ -25,6 +25,7 @@ return [
         'home' => ['🏠', 'Ⓜ️', '/home'],
         'back' => ['⬅️', '🔙', '/back'],
         'refresh' => ['🔄', '/refresh'],
+        'reload' => ['/reload'],
     ],
     'callback' => [
         'start' => null,

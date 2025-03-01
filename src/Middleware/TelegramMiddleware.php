@@ -4,6 +4,7 @@ namespace Mollsoft\Telegram\Middleware;
 
 use Closure;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Mollsoft\Telegram\DTO\Message;
 use Mollsoft\Telegram\TelegramRequest;
 
@@ -57,6 +58,9 @@ class TelegramMiddleware
                     case 'start':
                         return $this->start($request);
 
+                    case 'reload':
+                        return $this->start($request, true);
+
                     case 'home':
                         return redirect('/');
 
@@ -73,10 +77,14 @@ class TelegramMiddleware
             }
         }
 
+        if( ($encodeId = $request->callbackQuery()?->getData('encode')) && !Cache::get('telegram_'.$encodeId) ) {
+            return $this->start($request, true);
+        }
+
         return $next($request);
     }
 
-    protected function start(TelegramRequest $request): mixed
+    protected function start(TelegramRequest $request, bool $reload = false): mixed
     {
         $stack = $request->stack();
         $stackMessages = $stack->collect();
@@ -95,6 +103,10 @@ class TelegramMiddleware
 
         if( is_callable($callback = config('telegram.callback.start')) ) {
             call_user_func($callback, $request);
+        }
+
+        if( $reload ) {
+            return redirect()->refresh();
         }
 
         return redirect('/');
