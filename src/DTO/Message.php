@@ -27,7 +27,6 @@ class Message extends DTO
     {
         return [
             'message_id',
-            'from',
             'date',
             'chat',
         ];
