@@ -17,12 +17,18 @@ class Update extends DTO
     {
         return (int)$this->getOrFail('update_id');
     }
-
     public function message(): ?Message
     {
         $message = $this->get('message');
 
         return $message ? Message::fromArray($message) : null;
+    }
+
+    public function channelPost(): ?Message
+    {
+        $channelPost = $this->get('channel_post');
+
+        return $channelPost ? Message::fromArray($channelPost) : null;
     }
 
     public function callbackQuery(): ?CallbackQuery

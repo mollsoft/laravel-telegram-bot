@@ -36,6 +36,7 @@ class WebhookHandler
     protected int $pageTimeout, $pageWait, $pageDelay, $pageMaxRedirects;
     protected TelegramBot $bot;
     protected ?Message $message;
+    protected ?Message $channelPost;
     protected ?CallbackQuery $callbackQuery;
     protected TelegramChat $chat;
     protected ChatAPI $api;
@@ -58,6 +59,7 @@ class WebhookHandler
         $postData = $request->post();
         $update = Update::fromArray($postData);
         $this->message = $update->message();
+        $this->channelPost = $update->channelPost();
         $this->callbackQuery = $update->callbackQuery();
 
         $this
@@ -120,7 +122,7 @@ class WebhookHandler
     protected function setupChat(): static
     {
         /** @var ?Chat $chat */
-        $chat = $this->message?->chat() ?? $this->callbackQuery?->message()?->chat();
+        $chat = ($this->message?->chat() ?? $this->callbackQuery?->message()?->chat()) ?? $this->channelPost?->chat();
         if (is_null($chat)) {
             throw new \Exception('Chat not found.');
         }

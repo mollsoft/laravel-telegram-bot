@@ -264,7 +264,7 @@ class ChatAPI extends ApiClient
 
     public function canEdit(Message $old, Message $new): bool
     {
-        if (!$old->from()->isBot()) {
+        if (!$old->from()?->isBot()) {
             return false;
         }
 

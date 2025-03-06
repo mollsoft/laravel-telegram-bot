@@ -69,6 +69,9 @@ class PollingService extends BaseService
                         if ($update->message()) {
                             $postData['message'] = $update->message()->toArray();
                         }
+                        if ($update->channelPost()) {
+                            $postData['channel_post'] = $update->channelPost()->toArray();
+                        }
                         if ($update->callbackQuery()) {
                             $postData['callback_query'] = $update->callbackQuery()->toArray();
                         }

@@ -38,11 +38,18 @@ class Message extends DTO
         return (int)$this->getOrFail('message_id');
     }
 
-    public function from(): User
+    public function from(): ?User
     {
-        return User::fromArray(
-            $this->getOrFail('from')
-        );
+        $from = $this->get('from');
+
+        return $from ? User::fromArray($from) : null;
+    }
+
+    public function senderChat(): ?Chat
+    {
+        $senderChat = $this->get('sender_chat');
+
+        return $senderChat ? Chat::fromArray($senderChat) : null;
     }
 
     public function direction(): Direction
@@ -153,16 +160,16 @@ class Message extends DTO
         if (isset($attributes['photo']) || isset($attributes['photo_src'])) {
             $attributes['type'] = 'photo';
         }
-        if( isset( $attributes['video'] ) || isset($attributes['video_src']) ) {
+        if (isset($attributes['video']) || isset($attributes['video_src'])) {
             $attributes['type'] = 'video';
         }
-        if( isset( $attributes['document'] ) || isset($attributes['document_src']) ) {
+        if (isset($attributes['document']) || isset($attributes['document_src'])) {
             $attributes['type'] = 'document';
         }
-        if( isset($attributes['voice']) || isset($attributes['voice_src']) ) {
+        if (isset($attributes['voice']) || isset($attributes['voice_src'])) {
             $attributes['type'] = 'voice';
         }
-        if( isset($attributes['video_note']) || isset($attributes['video_note_src']) ) {
+        if (isset($attributes['video_note']) || isset($attributes['video_note_src'])) {
             $attributes['type'] = 'video_note';
         }
 
