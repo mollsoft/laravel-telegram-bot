@@ -209,7 +209,7 @@ class WebhookHandler
 
         $content = $this->routeLaunch(
             uri: $uri,
-            message: $this->message,
+            message: $this->message ?? $this->channelPost,
             callbackQuery: $this->callbackQuery,
             redirects: 0
         );
