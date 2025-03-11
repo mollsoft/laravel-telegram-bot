@@ -135,7 +135,7 @@ class WebhookHandler
             'chat_id' => $chat->id(),
         ], [
             'username' => $chat->username(),
-            'first_name' => $chat->firstName(),
+            'first_name' => $chat->firstName() ?? ($chat->toArray()['title'] ?? null),
             'last_name' => $chat->lastName(),
             'chat_data' => $chat->toArray(),
             'updated_at' => Date::now(),
