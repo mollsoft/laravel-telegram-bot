@@ -66,14 +66,28 @@ class TelegramRequest extends \Illuminate\Http\Request
             $server['HTTPS'] = 'on';
         }
 
-        return static::create(
-            uri: $uri,
-            method: 'TELEGRAM',
-            parameters: $parameters ?? [],
-            cookies: [],
-            files: [],
-            server: $server
-        )
+        try {
+            $request = static::create(
+                uri: $uri,
+                method: 'TELEGRAM',
+                parameters: $parameters ?? [],
+                cookies: [],
+                files: [],
+                server: $server
+            );
+        }
+        catch(\Exception) {
+            $request = static::create(
+                uri: '/',
+                method: 'TELEGRAM',
+                parameters: $parameters ?? [],
+                cookies: [],
+                files: [],
+                server: $server
+            );
+        }
+
+        return $request
             ->setBot($bot)
             ->setChat($chat)
             ->setMessage($message)
