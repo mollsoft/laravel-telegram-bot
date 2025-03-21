@@ -4,9 +4,9 @@ use Mollsoft\Telegram\DTO\BotCommand;
 
 return [
     'api' => [
-        'base_uri' => 'https://api.telegram.org',
-        'connect_timeout' => 20,
-        'timeout' => 60,
+        'base_uri' => env('TELEGRAM_BASE_URI', 'https://api.telegram.org'),
+        'connect_timeout' => env('TELEGRAM_CONNECT_TIMEOUT', 20),
+        'timeout' => env('TELEGRAM_TIMEOUT', 60),
     ],
     'init' => [
         'default' => [
