@@ -111,6 +111,12 @@ class TelegramRequest extends \Illuminate\Http\Request
                 if (($item['type'] ?? null) === 'blockquote') {
                     $entities[$i]['type'] = 'block_quote';
                 }
+                if( isset( $item['offset'] ) ) {
+                    $entities[$i]['offset'] = (int)$item['offset'];
+                }
+                if( isset( $item['length'] ) ) {
+                    $entities[$i]['length'] = (int)$item['length'];
+                }
             }
             $telegramEntities = new Entities($text, $entities);
             $textWithEntities = str_replace("<br>", "\n", $telegramEntities->toHTML(true));
