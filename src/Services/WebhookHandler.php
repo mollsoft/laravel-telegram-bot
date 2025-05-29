@@ -35,9 +35,9 @@ class WebhookHandler
 {
     protected int $pageTimeout, $pageWait, $pageDelay, $pageMaxRedirects;
     protected TelegramBot $bot;
-    protected ?Message $message;
-    protected ?Message $channelPost;
-    protected ?CallbackQuery $callbackQuery;
+    protected ?Message $message = null;
+    protected ?Message $channelPost = null;
+    protected ?CallbackQuery $callbackQuery = null;
     protected TelegramChat $chat;
     protected ChatAPI $api;
     protected MessageStack $stack;
