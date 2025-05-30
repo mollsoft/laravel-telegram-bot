@@ -13,6 +13,7 @@ use Mollsoft\Telegram\DTO\Message\Video;
 use Mollsoft\Telegram\DTO\Message\VideoNote;
 use Mollsoft\Telegram\DTO\Message\Voice;
 use Mollsoft\Telegram\DTO\ReplyKeyboard;
+use Mollsoft\Telegram\DTO\ReplyParameters;
 use Mollsoft\Telegram\DTO\VoiceNote;
 use Symfony\Component\DomCrawler\Crawler;
 
@@ -61,6 +62,14 @@ readonly class HTMLParser
     protected function createMessage(Crawler $crawler): Message
     {
         $message = Message::make();
+
+        if ($replyMessageId = $crawler->attr('reply-message-id')) {
+            $message->setReplyParameters(
+                ReplyParameters::fromArray([
+                    'message_id' => $replyMessageId,
+                ])
+            );
+        }
 
         $lines = [];
 
@@ -112,6 +121,14 @@ readonly class HTMLParser
     protected function createPhoto(Crawler $crawler): Photo
     {
         $photo = Photo::make();
+
+        if ($replyMessageId = $crawler->attr('reply-message-id')) {
+            $photo->setReplyParameters(
+                ReplyParameters::fromArray([
+                    'message_id' => $replyMessageId,
+                ])
+            );
+        }
 
         if ($src = $crawler->attr('src')) {
             $photo->setPhotoSrc($src);
@@ -174,6 +191,14 @@ readonly class HTMLParser
     {
         $video = Video::make();
 
+        if ($replyMessageId = $crawler->attr('reply-message-id')) {
+            $video->setReplyParameters(
+                ReplyParameters::fromArray([
+                    'message_id' => $replyMessageId,
+                ])
+            );
+        }
+
         if ($src = $crawler->attr('src')) {
             $video->setVideoSrc($src);
         }
@@ -235,6 +260,14 @@ readonly class HTMLParser
     {
         $entity = VideoNote::make();
 
+        if ($replyMessageId = $crawler->attr('reply-message-id')) {
+            $entity->setReplyParameters(
+                ReplyParameters::fromArray([
+                    'message_id' => $replyMessageId,
+                ])
+            );
+        }
+
         if ($src = $crawler->attr('src')) {
             $entity->setVideoNoteSrc($src);
         }
@@ -270,6 +303,14 @@ readonly class HTMLParser
     protected function createVoice(Crawler $crawler): Voice
     {
         $voice = Voice::make();
+
+        if ($replyMessageId = $crawler->attr('reply-message-id')) {
+            $message->setReplyParameters(
+                ReplyParameters::fromArray([
+                    'message_id' => $replyMessageId,
+                ])
+            );
+        }
 
         if ($src = $crawler->attr('src')) {
             $voice->setVoiceSrc($src);
@@ -325,6 +366,14 @@ readonly class HTMLParser
     protected function createDocument(Crawler $crawler): Document
     {
         $document = Document::make();
+
+        if ($replyMessageId = $crawler->attr('reply-message-id')) {
+            $message->setReplyParameters(
+                ReplyParameters::fromArray([
+                    'message_id' => $replyMessageId,
+                ])
+            );
+        }
 
         if ($src = $crawler->attr('src')) {
             $document->setDocumentSrc($src);

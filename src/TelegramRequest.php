@@ -140,7 +140,12 @@ class TelegramRequest extends \Illuminate\Http\Request
             $inlineKeyboardHTML .= '</inline-keyboard>';
         }
 
-        $html = $textWithEntities ? '<message><lines>'.$textWithEntities.'</lines>'.$inlineKeyboardHTML.'</message>' : '';
+        $tags = [];
+        if( $replyParameters = $message?->replyParameters() ) {
+            $tags[] = 'reply-message-id="'.$replyParameters->messageId().'"';
+        }
+
+        $html = $textWithEntities ? '<message '.implode(' ', $tags).'><lines>'.$textWithEntities.'</lines>'.$inlineKeyboardHTML.'</message>' : '';
 
         $photo = null;
         if ($this->message instanceof Message\Photo) {
@@ -150,16 +155,11 @@ class TelegramRequest extends \Illuminate\Http\Request
                 ->sortByDesc(fn(PhotoSize $item) => $item->width())
                 ->first();
             if ($photo) {
-                $tags = [
-                    'src="'.$photo->fileId().'"',
-                ];
+                $tags[] = 'src="'.$photo->fileId().'"';
                 if (($value = $this->message->showCaptionAboveMedia()) !== null) {
                     $tags[] = 'show_caption_above_media="'.($value ? 1 : 0).'"';
                 }
-                $html = '<photo '.implode(
-                        ' ',
-                        $tags
-                    ).'>'.($textWithEntities ? '<lines>'.$textWithEntities.'</lines>' : '').$inlineKeyboardHTML.'</photo>';
+                $html = '<photo '.implode(' ', $tags).'>'.($textWithEntities ? '<lines>'.$textWithEntities.'</lines>' : '').$inlineKeyboardHTML.'</photo>';
             }
         }
 
@@ -167,8 +167,8 @@ class TelegramRequest extends \Illuminate\Http\Request
         if ($this->message instanceof Message\Document) {
             $document = $this->message->document();
             if ($document) {
-                $html = '<document src="'.$document->fileId(
-                    ).'">'.($textWithEntities ? '<lines>'.$textWithEntities.'</lines>' : '').$inlineKeyboardHTML.'</document>';
+                $tags[] = 'src="'.$document->fileId().'"';
+                $html = '<document '.implode(' ', $tags).'>'.($textWithEntities ? '<lines>'.$textWithEntities.'</lines>' : '').$inlineKeyboardHTML.'</document>';
             }
         }
 
@@ -176,8 +176,8 @@ class TelegramRequest extends \Illuminate\Http\Request
         if ($this->message instanceof Message\Voice) {
             $voice = $this->message->voiceNote();
             if ($voice) {
-                $html = '<voice src="'.$voice->fileId(
-                    ).'">'.($textWithEntities ? '<line>'.$textWithEntities.'</line>' : '').$inlineKeyboardHTML.'</voice>';
+                $tags[] = 'src="'.$voice->fileId().'"';
+                $html = '<voice '.implode(' ', $tags).'>'.($textWithEntities ? '<line>'.$textWithEntities.'</line>' : '').$inlineKeyboardHTML.'</voice>';
             }
         }
 
@@ -185,16 +185,11 @@ class TelegramRequest extends \Illuminate\Http\Request
         if ($this->message instanceof Message\Video) {
             $video = $this->message->video();
             if ($video) {
-                $tags = [
-                    'src="'.$video->fileId().'"',
-                ];
+                $tags[] = 'src="'.$video->fileId().'"';
                 if (($value = $this->message->showCaptionAboveMedia()) !== null) {
                     $tags[] = 'show_caption_above_media="'.($value ? 1 : 0).'"';
                 }
-                $html = '<video '.implode(
-                        ' ',
-                        $tags
-                    ).'>'.($textWithEntities ? '<line>'.$textWithEntities.'</line>' : '').$inlineKeyboardHTML.'</video>';
+                $html = '<video '.implode(' ', $tags).'>'.($textWithEntities ? '<line>'.$textWithEntities.'</line>' : '').$inlineKeyboardHTML.'</video>';
             }
         }
 
@@ -202,7 +197,8 @@ class TelegramRequest extends \Illuminate\Http\Request
         if ($this->message instanceof Message\VideoNote) {
             $videoNote = $this->message->videoNote();
             if ($videoNote) {
-                $html = '<video-note src="'.$videoNote->fileId().'">'.$inlineKeyboardHTML.'</video-note>';
+                $tags[] = 'src="'.$videoNote->fileId().'"';
+                $html = '<video-note '.implode(' ', $tags).'>'.$inlineKeyboardHTML.'</video-note>';
             }
         }
 

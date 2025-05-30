@@ -58,6 +58,10 @@ class ChatAPI extends ApiClient
             'parse_mode' => 'html',
         ];
 
+        if( $message->replyParameters() ) {
+            $data['reply_parameters'] = $message->replyParameters()->toArray();
+        }
+
         if ($message->replyKeyboard()) {
             $data['reply_markup'] = $message->replyKeyboard()->toArray();
         }

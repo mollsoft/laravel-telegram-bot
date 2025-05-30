@@ -109,6 +109,26 @@ class Message extends DTO
         return $this;
     }
 
+    public function replyParameters(): ?ReplyParameters
+    {
+        if( $replyMessageId = $this->get('message_thread_id') ) {
+            return ReplyParameters::fromArray([
+                'message_id' => $replyMessageId,
+            ]);
+        }
+
+        return $this->get('reply_parameters') ? ReplyParameters::fromArray(
+            $this->get('reply_parameters')
+        ) : null;
+    }
+
+    public function setReplyParameters(?ReplyParameters $replyParameters): static
+    {
+        $this->attributes['reply_parameters'] = $replyParameters->toArray();
+
+        return $this;
+    }
+
     public function replyKeyboard(): ?ReplyKeyboard
     {
         return $this->get('reply_markup.keyboard') ? ReplyKeyboard::fromArray(
