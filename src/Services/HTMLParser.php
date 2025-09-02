@@ -368,7 +368,7 @@ readonly class HTMLParser
         $document = Document::make();
 
         if ($replyMessageId = $crawler->attr('reply-message-id')) {
-            $message->setReplyParameters(
+            $document->setReplyParameters(
                 ReplyParameters::fromArray([
                     'message_id' => $replyMessageId,
                 ])
