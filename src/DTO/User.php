@@ -11,7 +11,6 @@ class User extends DTO
         return [
             'id',
             'is_bot',
-            'first_name',
         ];
     }
 
@@ -31,7 +30,7 @@ class User extends DTO
 
     public function firstName(): string
     {
-        return $this->getOrFail('first_name');
+        return $this->get('first_name') ?: '?';
     }
 
     public function lastName(): ?string
