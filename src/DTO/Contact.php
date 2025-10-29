@@ -8,7 +8,7 @@ class Contact extends DTO
 {
    protected function required(): array
    {
-       return ['phone_number', 'first_name'];
+       return ['phone_number'];
    }
 
    public function phoneNumber(): string
@@ -18,7 +18,7 @@ class Contact extends DTO
 
    public function firstName(): string
    {
-       return $this->getOrFail('first_name');
+       return $this->get('first_name') ?: '?';
    }
 
    public function lastName(): ?string
